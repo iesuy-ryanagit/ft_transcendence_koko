@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>API Test</title>
+</head>
+<body>
+  <h1>API Test</h1>
+  
+  <section id="signup">
+    <h2>Sign Up</h2>
+    <form id="signupForm">
+      <label>Username: <input type="text" name="username" required></label><br>
+      <label>Password: <input type="password" name="password" required></label><br>
+      <label>Email: <input type="email" name="email" required></label><br>
+      <button type="submit">Sign Up</button>
+    </form>
+    <pre id="signupResult"></pre>
+  </section>
+  
+  <hr>
+  
+  <section id="login">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <label>Username: <input type="text" name="username" required></label><br>
+      <label>Password: <input type="password" name="password" required></label><br>
+      <button type="submit">Login</button>
+    </form>
+    <pre id="loginResult"></pre>
+  </section>
+  
+  <hr>
+  
+  <section id="setupOtp">
+    <h2>Setup OTP</h2>
+    <button id="setupOtpBtn">Setup OTP</button>
+    <pre id="setupOtpResult"></pre>
+  </section>
+  
+  <hr>
+  
+  <section id="verifyOtp">
+    <h2>Verify OTP</h2>
+    <form id="verifyOtpForm">
+      <label>OTP Token: <input type="text" name="otp" required></label>
+      <button type="submit">Verify OTP</button>
+    </form>
+    <pre id="verifyOtpResult"></pre>
+  </section>
+  
+  <hr>
+  
+  <section id="logout">
+    <h2>Logout</h2>
+    <button id="logoutBtn">Logout</button>
+    <pre id="logoutResult"></pre>
+  </section>
+  
+  <script>
+    // Base URL for API requests.
+    const baseUrl = "http://localhost:8000/api";
+    
+    // Global variable to hold the JWT token
+    let jwtToken = "";
+
+    // Helper function for result display
+    function displayResult(elementId, result) {
+      document.getElementById(elementId).innerText = JSON.stringify(result, null, 2);
+    }
+    
+    // Sign Up API call
+    document.getElementById("signupForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = {
+        username: formData.get("username"),
+        password: formData.get("password"),
+        email: formData.get("email")
+      };
+      try {
+        const response = await fetch(`${baseUrl}/signup/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        displayResult("signupResult", result);
+      } catch (error) {
+        displayResult("signupResult", error);
+      }
+    });
+    console.log(result) 
+    
+    // Login API call
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = {
+        username: formData.get("username"),
+        password: formData.get("password")
+      };
+      try {
+        const response = await fetch(`${baseUrl}/login/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        if(result.token) {
+          jwtToken = result.token;
+        }
+        displayResult("loginResult", result);
+      } catch (error) {
+        displayResult("loginResult", error);
+      }
+    });
+    console.log(result) 
+    // Setup OTP API call
+    document.getElementById("setupOtpBtn").addEventListener("click", async () => {
+      try {
+        const response = await fetch(`${baseUrl}/setup-otp/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "JWT " + jwtToken
+          },
+          credentials: "include"
+        });
+        const result = await response.json();
+        displayResult("setupOtpResult", result);
+      } catch (error) {
+        displayResult("setupOtpResult", error);
+      }
+    });
+    console.log(result) 
+    // Verify OTP API call
+    document.getElementById("verifyOtpForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = { otp_token: formData.get("otp") };
+      try {
+        const response = await fetch(`${baseUrl}/verify-otp/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "JWT " + jwtToken
+          },
+          credentials: "include",
+          body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        if(result.token) {
+          jwtToken = result.token;
+        }
+        displayResult("verifyOtpResult", result);
+      } catch (error) {
+        displayResult("verifyOtpResult", error);
+      }
+    });
+    console.log(result) 
+    // Logout API call
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      try {
+        const response = await fetch(`${baseUrl}/logout/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "JWT " + jwtToken
+          },
+          credentials: "include"
+        });
+        const result = await response.json();
+        displayResult("logoutResult", result);
+        jwtToken = "";
+      } catch (error) {
+        displayResult("logoutResult", error);
+      }
+    });
+  </script>
+</body>
+</html>
