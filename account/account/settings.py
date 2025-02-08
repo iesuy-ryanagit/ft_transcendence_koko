@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
@@ -54,11 +54,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'account.wsgi.application'
 
-# Database configuration (example using SQLite)
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / "db.sqlite3",
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("ACCOUNT_DB_NAME"),
+        "USER": os.environ.get("POSTGRES_USER"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get("POSTGRES_HOST"),
+        "PORT": os.environ.get("POSTGRES_PORT"),
     }
 }
 
@@ -93,7 +96,7 @@ SECRET_KEY = 'change-me-please'
 AUTH_USER_MODEL = 'user.CustomUser'  # Specify the custom user model
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",  # or whatever the frontend URL is
+    "http://localhost:8001",  # or whatever the frontend URL is
 ]
 
 

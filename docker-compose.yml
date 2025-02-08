@@ -1,0 +1,55 @@
+services:
+  account:
+    build: ./account
+    container_name: account
+    networks:
+      - app-network
+    volumes:
+      - ./account:/app
+    ports:
+      - "8001:8001"
+    env_file: .env
+    environment:
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,frontend,account,db
+      - POSTGRES_DB=mydatabase  
+
+  db:
+    build:
+      context: ./db
+    container_name: db
+    networks:
+      - app-network
+    env_file: .env
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    env_file: .env
+    networks:
+      - app-network
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    build: ./nginx
+    networks:
+      - app-network
+    env_file: .env
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - account
+
+networks:
+  app-network:
+    driver: bridge
+
