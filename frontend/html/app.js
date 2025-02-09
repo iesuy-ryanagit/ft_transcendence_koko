@@ -31,7 +31,7 @@ window.onload = async function() {
   const appDiv = document.getElementById("app");
 
   try {
-    const htmlContent = await fetchHtml("http://account:8001/myapp/");
+    const htmlContent = await fetchHtml("http://account:8000/myapp/");
     appDiv.innerHTML = htmlContent;
   } catch (error) {
     appDiv.innerHTML = `<h1>Error: ${error.message}</h1>`;

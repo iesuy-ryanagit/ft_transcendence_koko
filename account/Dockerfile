@@ -12,7 +12,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # Expose port 8000
-EXPOSE 8001
+EXPOSE 8000
 
-# Run server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8001"]
+# コピーしたmigrate.shを実行可能にする
+RUN chmod +x migrate.sh
+
+# マイグレーションを実行する（`docker-entrypoint.sh`などを用意しても良い）
+CMD ["./migrate.sh"]
+
+# サーバーを起動
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

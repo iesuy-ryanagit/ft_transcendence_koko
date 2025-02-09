@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     'user',
     'django_otp',
     'django_otp.plugins.otp_totp',
@@ -96,7 +97,9 @@ SECRET_KEY = 'change-me-please'
 AUTH_USER_MODEL = 'user.CustomUser'  # Specify the custom user model
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8001",  # or whatever the frontend URL is
+    "http://localhost:3000",  # フロントエンドのURL
+    "http://frontend:3000",   # Dockerの内部ネットワーク用
+    "http://localhost:80",     # もしフロントエンドがポート80で動いている場合\
+    "http://nginx:80",      # Dockerの内部ネットワーク用
 ]
-
 
