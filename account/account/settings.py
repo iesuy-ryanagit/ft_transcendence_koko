@@ -96,10 +96,11 @@ SECRET_KEY = 'change-me-please'
 # Custom user model
 AUTH_USER_MODEL = 'user.CustomUser'  # Specify the custom user model
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # フロントエンドのURL
-    "http://frontend:3000",   # Dockerの内部ネットワーク用
-    "http://localhost:80",     # もしフロントエンドがポート80で動いている場合\
-    "http://nginx:80",      # Dockerの内部ネットワーク用
-]
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",  # フロントエンドのURL
+#     "http://frontend:3000",   # Dockerの内部ネットワーク用
+#     "http://localhost:80",     # もしフロントエンドがポート80で動いている場合\
+#     "http://nginx:80",      # Dockerの内部ネットワーク用
+# ]
 

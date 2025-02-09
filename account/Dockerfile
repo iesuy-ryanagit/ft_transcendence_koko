@@ -15,10 +15,10 @@ COPY . /app/
 EXPOSE 8000
 
 # コピーしたmigrate.shを実行可能にする
-RUN chmod +x migrate.sh
+RUN chmod +x init.sh
 
 # マイグレーションを実行する（`docker-entrypoint.sh`などを用意しても良い）
-CMD ["./migrate.sh"]
+CMD ["./init.sh"]
 
 # サーバーを起動
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
