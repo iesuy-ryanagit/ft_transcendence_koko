@@ -35,10 +35,5 @@ class ProfileView(views.APIView):
 
     def get(self, request, *args, **kwargs):
         # The `request.user` should already be authenticated if IsAuthenticated is used.
-        if request.user.is_authenticated:
-            user = request.user
-            return Response(CustomUserSerializer(user).data)
-        else:
-            return Response({'error': 'You must be logged in to view the profile.'}, status=status.HTTP_401_UNAUTHORIZED)
-
+        return Response(CustomUserSerializer(user).data)
 
