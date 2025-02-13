@@ -6,6 +6,19 @@ from .serializers import CustomUserSerializer, SignupSerializer, LoginSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from .two_fa import TwoFA
+
+
+class TwoFAView(views.APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = LoginSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        two_fa = TwoFA()
+        two_fa.generate_secret()
+        
+        uri = two_fa.make_uri(request.user.email, two_fa.secret)
+        return Response({'uri': uri}, status=status.HTTP_200_OK)
 
 class SignupView(views.APIView):
     def post(self, request, *args, **kwargs):

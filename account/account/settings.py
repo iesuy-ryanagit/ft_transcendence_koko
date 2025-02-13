@@ -24,7 +24,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'user.middleware.CustomSessionMiddleware', 
+    # "django.contrib.sessions.middleware.SessionMiddleware",
+    "user.middleware.CustomSessionMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -32,6 +33,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+
+
+JWT_SECRET_KEY = "datoukeiou"
+SECRET_KEY = "datoumitakai"
 
 ROOT_URLCONF = 'account.urls'
 

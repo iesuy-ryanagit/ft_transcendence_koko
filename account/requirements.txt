@@ -6,3 +6,4 @@ django-otp
 psycopg2
 jwt
 Pillow
+pyotp
