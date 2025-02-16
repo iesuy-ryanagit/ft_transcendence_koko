@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from tournament.models import Tournament, Match
-from tournament.services import create_tournament_schedule, process_match_result
+from tournament.models import Tournament, Match, Score
+from tournament.services import create_tournament_schedule, process_match_result, record_score
 
 User = get_user_model()
 
@@ -87,3 +87,24 @@ class TournamentServicesTest(TestCase):
         self.tournament_small.refresh_from_db()
         self.assertEqual(self.tournament_small.status, "completed")
         self.assertEqual(self.tournament_small.winner, matches[0].player1)
+
+    def test_record_score(self):
+        """
+        Test that record_score() correctly records a score for a match.
+        """
+        matches = create_tournament_schedule(self.tournament_small)
+        self.assertEqual(len(matches), 1)
+        match = matches[0]
+
+        # Record a score for player1
+        score_obj = record_score(match, player=match.player1, score=3)
+
+        # Assert that the returned Score instance has the correct attributes.
+        self.assertIsNotNone(score_obj.pk)  # Score is saved in database.
+        self.assertEqual(score_obj.match, match)
+        self.assertEqual(score_obj.player, match.player1)
+        self.assertEqual(score_obj.score, 3)
+
+        # Optionally, verify that the score is accessible via the match's related name (if defined)
+        self.assertIn(score_obj, match.scores.all())
+        
