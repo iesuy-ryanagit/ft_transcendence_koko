@@ -19,7 +19,7 @@ class Tournament(models.Model):
 	max_players = models.IntegerField()
 	winner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 	current_round = models.IntegerField(default=1)
-	participants = models.ManyToManyField(User, related_name='tournaments')
+	participants = models.ManyToManyField(User, related_name='tournaments', blank=True)
 	
 	def __str__(self):
 		return f"{self.name} - {self.status}"

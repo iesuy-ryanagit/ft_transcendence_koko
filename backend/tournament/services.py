@@ -6,7 +6,9 @@ User = get_user_model()
 
 def create_tournament_schedule(tournament: Tournament):
 	"""Aoutmatically first schedule of Tournament"""
+	print(f"Creating schedule for {tournament.name}")
 	participants = list(tournament.participants.all())
+	print(f"Participants: {participants}")
 	random.shuffle(participants)
 
 	matches = []
@@ -21,6 +23,7 @@ def create_tournament_schedule(tournament: Tournament):
 			player1=player1,
 			player2=player2
 		)
+		print(f"Created match: {match}")
 		matches.append(match)
 	
 	tournament.status = "ongoing"
