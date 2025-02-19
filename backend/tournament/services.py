@@ -1,4 +1,4 @@
-from tournament.models import Tournament, Match, Score
+from tournament.models import Tournament, Match, TournamentParticipant
 from django.contrib.auth import get_user_model
 import random
 
@@ -7,10 +7,11 @@ User = get_user_model()
 def create_tournament_schedule(tournament: Tournament):
 	"""Aoutmatically first schedule of Tournament"""
 	print(f"Creating schedule for {tournament.name}")
-	participants = list(tournament.participants.all())
+	participants_qs = TournamentParticipant.objects.filter(tournament=tournament)
+	participants = [tp.user for tp in participants_qs]
 	print(f"Participants: {participants}")
+	
 	random.shuffle(participants)
-
 	matches = []
 	num_matches = len(participants) // 2
 
@@ -26,12 +27,12 @@ def create_tournament_schedule(tournament: Tournament):
 		print(f"Created match: {match}")
 		matches.append(match)
 	
-	tournament.status = "ongoing"
+	tournament.status = "pending"
 	tournament.save()
 
 	return matches
 
-def	process_match_result(match: Match, winner: User, score: str):
+def	process_match_result(match: Match, winner: User, score: str): # type: ignore
 	"""Record winner of the match, Generate next round match"""
 	match.winner = winner
 	match.score = score
@@ -75,12 +76,48 @@ def	process_match_result(match: Match, winner: User, score: str):
 	
 	return "Next round pending"
 
-def record_score(match: Match, player: User, score: int):
-	"""Record score for a match"""
-	return Score.objects.create(
-		match=match,
-		player=player,
-		score=score
-	)
+
+def start_tournament(tournament: Tournament):
+
+	# participants_qs = TournamentParticipant.objects.filter(tournament=tournament)
+	# participants = [tp.user for tp in participants_qs]
+
+	participants = list(tournament.tournament_participants.all())
+	# num_participants = len(participants)
+	# if num_participants < 2:
+	# 	raise Exception("Not enough participants to start tournament.")
+	# if num_participants % 2 != 0:
+	# 	raise Exception("Participants count must be even to start tournament.")
+	
+	random.shuffle(participants)
+	matches = []
+	current_round = 1
+
+	for i in range(0, len(participants), 2):
+		player1 = participants[i]
+		player2 = participants[i + 1]
+		match = Match.objects.create(
+			tournament=tournament,
+			round=current_round,
+			player1=player1,
+			player2=player2,
+			status="pending"
+		)
+		matches.append(match)
+	
+	tournament.status = "ongoing"
+	tournament.current_round = current_round
+	tournament.save()
+	return matches
+	
+
+
+# def record_score(match: Match, player: User, score: int):
+# 	"""Record score for a match"""
+# 	return Score.objects.create(
+# 		match=match,
+# 		player=player,
+# 		score=score
+# 	)
 	
 	
