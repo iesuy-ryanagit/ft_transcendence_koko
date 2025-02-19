@@ -66,7 +66,7 @@ def	process_match_result(match: Match, winner: User, score: str): # type: ignore
 
 	# If only winner is present, the tournament is over.
 	if len(winners) == 1:
-		tournament.winner = winners[0].user
+		tournament.winner = winners[0]
 		tournament.status = "completed"
 		tournament.current_round = current_round
 		tournament.save()
