@@ -1,5 +1,6 @@
 from tournament.models import Tournament, Match, TournamentParticipant
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 import random
 
 User = get_user_model()
@@ -35,46 +36,61 @@ def create_tournament_schedule(tournament: Tournament):
 def	process_match_result(match: Match, winner: User, score: str): # type: ignore
 	"""Record winner of the match, Generate next round match"""
 	match.winner = winner
-	match.score = score
+	match.final_score = score
 	match.status = "completed"
+	match.end_time = timezone.now()
 	match.save()
 
 	tournament = match.tournament
 	current_round = match.round
 
+	#2. Check if there are remaining matches in the current round
 	remaining_matches = Match.objects.filter(
 		tournament=tournament,
 		round=current_round,
 		status="pending"
 	)
-
-	if not remaining_matches.exists():
-		winner = Match.objects.filter(
-			tournament=tournament,
-			round=current_round,
-		).values_list('winner', flat=True)
-
-		if len(winner) == 1:
-			tournament.winner = User.objects.get(id=winner[0])
-			tournament.status = "completed"
-			tournament.save()
-			return "Tournament completed"
-		
-		new_matches = []
-		for i in range(0, len(winner), 2):
-			if i + 1 < len(winner):
-				player1 = User.objects.get(id=winner[i])
-				player2 = User.objects.get(id=winner[i + 1])
-				match = Match.objects.create(
-					tournament=tournament,
-					round=current_round + 1,
-					player1=player1,
-					player2=player2
-				)
-				new_matches.append(match)
-		return new_matches
+	if remaining_matches.exists():
+		return "Next round pending"
 	
-	return "Next round pending"
+	#3. ALL matches in the current round are completed
+	# Retrieve the matches in the order they were created
+	round_matches = Match.objects.filter(
+		tournament=tournament,
+		round=current_round
+	).order_by('id')
+
+
+	# Collect the winners of each match
+	winners = [m.winner for m in round_matches]
+
+	# If only winner is present, the tournament is over.
+	if len(winners) == 1:
+		tournament.winner = winners[0].user
+		tournament.status = "completed"
+		tournament.current_round = current_round
+		tournament.save()
+		return "Tournament completed"
+	
+	#4. Create matches for the next round
+	new_round = current_round + 1
+	new_matches = []
+
+	for i  in range(0, len(winners), 2):
+		if i + 1 < len(winners):
+			new_match = Match.objects.create(
+				tournament=tournament,
+				round=new_round,
+				player1=winners[i],
+				player2=winners[i + 1], 
+				status="pending"
+			)
+			new_matches.append(new_match)
+
+	tournament.current_round = new_round
+	tournament.save()
+
+	return new_matches
 
 
 def start_tournament(tournament: Tournament):

@@ -53,9 +53,9 @@ class TournamentParticipantSerializer(serializers.ModelSerializer):
         if TournamentParticipant.objects.filter(tournament=tournament, alias=alias).exists():
             raise serializers.ValidationError("Alias already exists")
         
-        request = self.context.get('request')
-        if request and TournamentParticipant.objects.filter(tournament=tournament, user=request.user).exists():
-            raise serializers.ValidationError("You are already in this tournament")
+        # request = self.context.get('request')
+        # if request and TournamentParticipant.objects.filter(tournament=tournament, user=request.user).exists():
+        #     raise serializers.ValidationError("You are already in this tournament")
         
         data['tournament'] = tournament
         return data
@@ -181,6 +181,12 @@ class TournamentFinishSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         tournament = Tournament.objects.get(id=validated_data['tournament_id'])
+
+        final_match = tournament.matches.filter(status="completed").order_by('end_time').last()
+        if not final_match or not final_match.winner:
+            raise serializers.ValidationError("Final match winner could not be determined.")
+        
+        tournament.winner = final_match.winner
         tournament.status = "completed"
         tournament.save()
         return tournament

@@ -17,7 +17,13 @@ class Tournament(models.Model):
 	status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 	created_at = models.DateTimeField(auto_now_add=True)
 	max_participants = models.IntegerField()
-	winner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+	winner = models.ForeignKey(
+		"TournamentParticipant",
+		on_delete=models.SET_NULL,
+		null=True,
+		blank=True,
+		related_name="tournament_wins"
+	)
 	current_round = models.IntegerField(default=1)
 	# participants = models.ManyToManyField(User, related_name='tournaments', blank=True)
 	

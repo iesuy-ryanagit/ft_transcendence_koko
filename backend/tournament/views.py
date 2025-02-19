@@ -81,12 +81,19 @@ class MatchEndView(APIView):
         if serializer.is_valid():
             match = serializer.save()
             result = process_match_result(match, match.winner, match.final_score)
+
+            if isinstance(result, list):
+                serialized_matches = MatchDetailSerializer(result, many=True).data
+                next_round = serialized_matches
+            else:
+                next_round = result
+
             return Response({
                 "message": "Match result recorded successfully",
                 "match_id": str(match.id),
-                "final_score": match.score,
-                "winner": match.winner.id if match.winner else None,
-                "next_round": result
+                "final_score": match.final_score,
+                "winner": str(match.winner.id) if match.winner else None,
+                "next_round": next_round
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
