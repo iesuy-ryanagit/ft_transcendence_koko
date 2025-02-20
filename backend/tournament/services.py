@@ -71,6 +71,7 @@ def	process_match_result(match: Match, winner: User, score: str): # type: ignore
 		tournament.winner = winners[0]
 		tournament.status = "completed"
 		tournament.current_round = current_round
+		tournament.end_time = timezone.now()
 		tournament.save()
 		return "Tournament completed"
 	
@@ -84,7 +85,8 @@ def	process_match_result(match: Match, winner: User, score: str): # type: ignore
 				tournament=tournament,
 				round=new_round,
 				player1=winners[i],
-				player2=winners[i + 1], 
+				player2=winners[i + 1],
+				start_time=timezone.now(),
 				status="pending"
 			)
 			new_matches.append(new_match)
