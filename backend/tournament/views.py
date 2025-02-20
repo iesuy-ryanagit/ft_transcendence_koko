@@ -14,7 +14,8 @@ from .serializers import (
     TournamentParticipantSerializer,
     TournamentFinishSerializer,
     TournamentStartSerializer,
-    MatchDetailSerializer
+    MatchDetailSerializer,
+    TournamentResultSerializer
 )
 from .services import create_tournament_schedule, process_match_result, start_tournament
 
@@ -147,3 +148,15 @@ class TournamentStartView(APIView):
                 }, status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class TournamentResultDetailView(generics.RetrieveAPIView):
+    queryset = Tournament.objects.all()
+    serializer_class = TournamentResultSerializer
+    lookup_field = 'id'
+
+class TournamentResultListView(generics.ListAPIView):
+    queryset = Tournament.objects.all()
+    serializer_class = TournamentResultSerializer
+    
+    

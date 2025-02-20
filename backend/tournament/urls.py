@@ -7,7 +7,9 @@ from tournament.views import (
     TournamentDetailView,
     TournamentFinishView,
     TournamentStartView,
-    JoinTournamentParticipantView
+    JoinTournamentParticipantView,
+    TournamentResultDetailView,
+    TournamentResultListView
 )
 urlpatterns = [
     path('tournament/create/', CreateTournamenView.as_view(), name='tournament_create'),
@@ -17,4 +19,6 @@ urlpatterns = [
     path('tournament/<uuid:pk>/', TournamentDetailView.as_view(), name='tournament_detail'),
     path('tournament/finish/', TournamentFinishView.as_view(), name='tournament_finish'),
     path('tournament/start/', TournamentStartView.as_view(), name='tournament_start'),
+    path('tournament/result/', TournamentResultListView.as_view(), name='tournament_result_list'),
+    path('tournament/result/<uuid:id>/', TournamentResultDetailView.as_view(), name='tournament_result_detail'),
 ]

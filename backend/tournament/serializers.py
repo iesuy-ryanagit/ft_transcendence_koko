@@ -209,4 +209,51 @@ class TournamentStartSerializer(serializers.Serializer):
             raise serializers.ValidationError("Tournament is not pending")
         return value
     
+
+class TournamentResultSerializer(serializers.ModelSerializer):
+    winner = serializers.SerializerMethodField()
+    runner_up = serializers.SerializerMethodField()
+    final_score = serializers.SerializerMethodField()
+    matches = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Tournament
+        fields = ['id', 'name', 'winner', 'runner_up', 'final_score', 'matches']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance is not None and not hasattr(self.instance, '__iter__'):
+            pass
+        else:
+            request = self.context.get('request')
+            if request:
+                show_matches = request.query_params.get('show_matches', '').lower()
+                if show_matches != 'true':
+                    self.fields.pop('matches', None)
+    def get_final_match(self, obj):
+        return obj.matches.filter(status='completed').order_by('-round', '-end_time').first()
+
+    def get_winner(self, obj):
+        final_match = self.get_final_match(obj)
+        if final_match and final_match.winner:
+            return final_match.winner.alias
+        return None
+
+    def get_runner_up(self, obj):
+        final_match = self.get_final_match(obj)
+        if final_match and final_match.winner:
+            runner_up = final_match.player2 if final_match.winner == final_match.player1 else final_match.player1
+            return runner_up.alias
+        return None
     
+    def get_final_score(self, obj):
+        final_match = Match.objects.filter(tournament=obj, round=obj.current_round).first()
+        if final_match:
+            return final_match.final_score
+        return None
+        
+    def get_matches(self, obj):
+        matches = obj.matches.all().order_by('round', 'start_time')
+        serializer = MatchDetailSerializer(matches, many=True, context=self.context)
+        return serializer.data
