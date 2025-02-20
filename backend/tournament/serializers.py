@@ -7,7 +7,7 @@ User = get_user_model()
 
 class TournamentSerializer(serializers.ModelSerializer):
     # auto_join is a boolean field that is to join the tournament automatically when created
-    auto_join = serializers.BooleanField(default=True, required=False)
+    auto_join = serializers.BooleanField(default=False, required=False)
 
     class Meta:
         model = Tournament
@@ -15,18 +15,18 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # To take out auto_join from the validated data
-        auto_join = validated_data.pop('auto_join', True)
+        auto_join = validated_data.pop('auto_join', False)
         #Create tournament instance
         tournament = Tournament.objects.create(**validated_data)
 
         # If auto_join is true and the user is authenticated, add the user to the tournament
-        request = self.context.get('request')
-        if request and auto_join and request.user.is_authenticated:
-            TournamentParticipant.objects.create(
-                tournament=tournament,
-                user=request.user,
-                alias=request.user.username
-            )
+        # request = self.context.get('request')
+        # if request and auto_join and request.user.is_authenticated:
+        #     TournamentParticipant.objects.create(
+        #         tournament=tournament,
+        #         user=request.user,
+        #         alias=request.user.username
+        #     )
 
         return tournament
     

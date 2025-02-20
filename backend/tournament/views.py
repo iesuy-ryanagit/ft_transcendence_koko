@@ -24,6 +24,7 @@ class CreateTournamenView(APIView):
 
     def post(self, request):
         serializer = TournamentSerializer(data=request.data, context={'request': request})
+        # Maybe this that to create a tournament doesn't need to be here
         if serializer.is_valid():
             tournament = serializer.save()
             create_tournament_schedule(tournament)

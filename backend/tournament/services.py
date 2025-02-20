@@ -23,7 +23,9 @@ def create_tournament_schedule(tournament: Tournament):
 			tournament=tournament,
 			round=1,
 			player1=player1,
-			player2=player2
+			player2=player2,
+			start_time=timezone.now(),
+			status="pending"
 		)
 		print(f"Created match: {match}")
 		matches.append(match)
@@ -99,12 +101,35 @@ def start_tournament(tournament: Tournament):
 	# participants = [tp.user for tp in participants_qs]
 
 	participants = list(tournament.tournament_participants.all())
-	# num_participants = len(participants)
-	# if num_participants < 2:
-	# 	raise Exception("Not enough participants to start tournament.")
-	# if num_participants % 2 != 0:
-	# 	raise Exception("Participants count must be even to start tournament.")
-	
+	num_participants = len(participants)
+
+	target = num_participants
+	if num_participants in [1, 3]:
+		target = 4
+	elif num_participants in [5, 6, 7]:
+		target = 8
+
+	if target > num_participants:
+		missing = target - num_participants
+		User = get_user_model()
+		try:
+			test_user = User.objects.get(username="testuser")
+		except User.DoesNotExist:
+			raise Exception("Test user not found")
+		
+		for i in range(missing):
+			if i == 0 and not any(tp.user == "test_user" for tp in participants):
+				alias = "testuser"
+			else:
+				alias = f"testuser{i+1}"
+			TournamentParticipant.objects.create(
+				tournament=tournament,
+				user=test_user,
+				alias=alias
+			)
+
+	participants = list(tournament.tournament_participants.all())
+
 	random.shuffle(participants)
 	matches = []
 	current_round = 1
@@ -117,6 +142,7 @@ def start_tournament(tournament: Tournament):
 			round=current_round,
 			player1=player1,
 			player2=player2,
+			start_time=timezone.now(),
 			status="pending"
 		)
 		matches.append(match)
@@ -125,7 +151,7 @@ def start_tournament(tournament: Tournament):
 	tournament.current_round = current_round
 	tournament.save()
 	return matches
-	
+
 
 
 # def record_score(match: Match, player: User, score: int):
