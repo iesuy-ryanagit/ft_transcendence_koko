@@ -31,6 +31,8 @@ class Tournament(models.Model):
 		return f"{self.name} - {self.status}"
 
 class TournamentParticipant(models.Model):
+	# the following id filed are implicitly created by django	
+	# id = models.AutoFiled(primary_key=True)
 	tournament = models.ForeignKey(Tournament, related_name="tournament_participants", on_delete=models.CASCADE)
 	user = models.ForeignKey(User, related_name="tournament_entries", on_delete=models.CASCADE)
 	alias = models.CharField(max_length=100)
