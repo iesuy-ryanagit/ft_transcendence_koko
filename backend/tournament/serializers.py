@@ -108,15 +108,21 @@ class MatchEndSerializer(serializers.Serializer):
     final_score = serializers.CharField(max_length=10)
     winner = serializers.PrimaryKeyRelatedField(queryset=TournamentParticipant.objects.all())
 
-    def validate_match_id(self, value):
+    def validate(self, data):
+        match_id = data.get('match_id')
         try:
-            match = Match.objects.get(id=value)
+            match = Match.objects.get(id=match_id)
         except Match.DoesNotExist:
             raise serializers.ValidationError("Match does not exist")
         if match.status == "completed":
             raise serializers.ValidationError("Match already completed")
-        return value
-    
+        
+        winner = data.get('winner')
+        if winner not in [match.player1, match.player2]:
+            raise serializers.ValidationError("Winner is not a participant in this match")
+        data['match'] = match
+        return data
+
     def create(self, validated_data):
         match_id = validated_data.get("match_id")
         final_score = validated_data.get("final_score")
