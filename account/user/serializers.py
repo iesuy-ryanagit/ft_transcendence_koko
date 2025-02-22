@@ -28,14 +28,14 @@ class LoginSerializer(serializers.Serializer):
         # # ユーザー名とパスワードの検証
         print("Received data in validate:", data) 
         if not username or not password:
-            raise serializers.ValidationError('Username and password are required.')
+            raise serializers.ValidationError({'non_field_errors': ['Invalid credentials']})
 
         # # authenticateでユーザー認証
         user = authenticate(username=username, password=password)
         if user:
             data['user'] = user  # 認証に成功したら、userをdataに追加
         else:
-            raise serializers.ValidationError('Invalid credentials')  # 認証に失敗したらエラーを返す
+            raise serializers.ValidationError({'non_field_errors': ['Invalid credentials']})
 
         return data
 

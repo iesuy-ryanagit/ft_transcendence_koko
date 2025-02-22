@@ -1,29 +1,31 @@
-import psycopg2
-from psycopg2 import OperationalError
+import time
+# from .models import CustomUser
+# from rest_framework import exceptions
+# from rest_framework.authentication import BaseAuthentication
 
-def connect_to_postgresql():
-    try:
-        # PostgreSQLコンテナへの接続設定
-        connection = psycopg2.connect(
-            host="db",  # PostgreSQLコンテナの名前
-            database="account_db",       # 接続するデータベース名
-            user="postgres",                # PostgreSQLのユーザー名
-            password="postgres",            # PostgreSQLのパスワード
-            port="5432"                       # デフォルトのPostgreSQLポート
-        )
-        cursor = connection.cursor()
-        print("PostgreSQLに接続できました！")
-        
-        # クエリの実行（例えばバージョン情報の取得）
-        cursor.execute("SELECT version();")
-        db_version = cursor.fetchone()
-        print(f"PostgreSQLのバージョン: {db_version}")
+SECRET_KEY = "hello"
 
-        # 接続終了
-        cursor.close()
-        connection.close()
-    except OperationalError as e:
-        print(f"エラーが発生しました: {e}")
+import jwt
+print(jwt.__version__)  # PyJWT のバージョンを確認
+print(jwt.__file__)     # モジュールのファイルパスを確認
 
-# 実行
-connect_to_postgresql()
+def generate_jwt():
+    timestamp = int(time.time()) + 60 * 60 * 24 * 7  # 1週間後
+    encoded = jwt.encode(
+        {"username": "hello", "exp": timestamp},
+        SECRET_KEY,
+        algorithm="HS256"
+    )
+    return encoded
+
+
+
+
+tmp =generate_jwt()
+
+print(tmp)
+
+origin= jwt.decode(tmp, SECRET_KEY, algorithms="HS256")
+
+print(origin)
+
