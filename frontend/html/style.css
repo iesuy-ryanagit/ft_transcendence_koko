@@ -1,0 +1,27 @@
+/* 画面中央に配置 */
+.auth-container {
+    width: 50%;  /* 入力欄を短く */
+    max-width: 90%;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    
+    /* 完全中央配置 */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* 入力欄の幅を短く */
+.auth-input {
+    width: 50%;
+    margin: 8px auto;
+}
+
+/* ボタンの幅を統一 */
+.w-100 {
+    width: 100%;
+}
