@@ -12,10 +12,11 @@ async function login() {
 
     const data = await response.json();
     if (response.ok) {
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('username', username);  // ユーザー名を保存
-		enableNavigation(true);  // 🔥 ログイン後にメニューを有効化
-        navigateTo('dashboard');  // 修正: showDashboard() → navigateTo()
+        localStorage.setItem('access_token', data.jwt);
+        localStorage.setItem('username', username);
+		document.cookie = `jwt=${data.jwt}; path=/; max-age=86400; SameSite=Lax`;
+		enableNavigation(true);
+        navigateTo('dashboard');
     } else {
         alert('ログイン失敗: ' + (data.message || 'サーバーエラー'));
     }
@@ -44,6 +45,7 @@ function enableNavigation(enable) {
     document.getElementById('nav-dashboard').classList.toggle('disabled', !enable);
     document.getElementById('nav-profile').classList.toggle('disabled', !enable);
     document.getElementById('nav-logout').classList.toggle('disabled', !enable);
+	document.getElementById('nav-tfasign').classList.toggle('disabled', !enable);
 }
 
 // 画面遷移関数
@@ -63,7 +65,9 @@ function navigateTo(page, addHistory = true) {
         document.getElementById('create-tournament').classList.remove('d-none');
     } else if (page === 'match-result') {
         document.getElementById('match-result').classList.remove('d-none');
-    }
+    } else if (page == '2FA-register'){
+		document.getElementById('2FA-register').classList.remove('d-none');
+	}
 
     // ブラウザ履歴を追加
     if (addHistory) {
@@ -73,7 +77,6 @@ function navigateTo(page, addHistory = true) {
 
 async function fetchTournaments() {
     const token = localStorage.getItem('access_token');
-    console.log('トークン:', token);  // トークンが取得できているか確認
 
     const response = await fetch(apiBase + 'tournaments/', {
         method: 'GET',
@@ -81,7 +84,6 @@ async function fetchTournaments() {
     });
 
     const data = await response.json();
-    console.log('トーナメント取得レスポンス:', data);  // レスポンス確認
 
     if (response.ok) {
         const list = document.getElementById('tournament-list');
@@ -103,8 +105,6 @@ async function createTournament() {
     const name = document.getElementById('tournament-name').value;
     const token = localStorage.getItem('access_token');
 
-    console.log('トーナメント作成:', name); // デバッグ用
-
     const response = await fetch(apiBase + 'tournaments/', {
         method: 'POST',
         headers: { 
@@ -115,12 +115,41 @@ async function createTournament() {
     });
 
     const data = await response.json();
-    console.log('トーナメント作成レスポンス:', data);  // レスポンス確認
 
     if (response.ok) {
         navigateTo('dashboard');
     } else {
         alert('作成失敗: ' + (data.message || 'サーバーエラー'));
+    }
+}
+
+async function fetchTFAQRCode() {
+    const token = localStorage.getItem('access_token'); // ログイン時に保存したJWTトークン
+
+    if (!token) {
+        alert("ログインが必要です");
+        return;
+    }
+
+    try {
+        const response = await fetch(apiBase + 'signup-tfa/', {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`, // 認証ヘッダーにJWTトークンを設定
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "2FAのQRコード取得に失敗しました");
+        }
+
+        const data = await response.json();
+        displayQRCode(data.qr_url, data.secret_key);
+
+    } catch (error) {
+        alert(`エラー: ${error.message}`);
     }
 }
 
@@ -144,6 +173,17 @@ function showCreateTournament(addHistory = true) {
 
 function showMatchResult(addHistory = true) {
     navigateTo('match-result', addHistory);
+}
+
+function showTFARegister(addHistory = true) {
+    fetchTFAQRCode();
+    navigateTo('2FA-register', addHistory);
+}
+
+function displayQRCode(qrUrl, secretKey) {
+    document.getElementById("tfa-qr-image").src = qrUrl; // QRコード画像を表示
+    document.getElementById("tfa-secret-key").textContent = secretKey; // シークレットキーを表示
+    document.getElementById("2FA-register").classList.remove("d-none"); // 2FA登録画面を表示
 }
 
 // ログアウト処理

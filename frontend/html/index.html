@@ -23,6 +23,9 @@
 						<a class="nav-link disabled" href="#" id="nav-profile" onclick="navigateTo('profile')">プロフィール</a>
 					</li>
 					<li class="nav-item">
+						<a class="nav-link disabled" href="#" id="nav-tfasign" onclick="showTFARegister()">2FA登録</a>
+					</li>
+					<li class="nav-item">
 						<a class="nav-link disabled" href="#" id="nav-logout" onclick="logout()">ログアウト</a>
 					</li>
 				</ul>
@@ -79,6 +82,15 @@
             <p><strong>ユーザー名:</strong> <span id="profile-username">未ログイン</span></p>
             <button class="btn btn-secondary" onclick="navigateTo('dashboard')">戻る</button>
         </div>
+
+		<!--2FA登録画面-->
+		<div id="2FA-register" class="page d-none">
+			<h2>2FAの設定</h2>
+			<p>以下のQRコードをGoogle Authenticatorなどのアプリでスキャンしてください。</p>
+			<img id="tfa-qr-image" src="" alt="2FA QRコード" class="img-fluid">
+			<p><strong>シークレットキー:</strong> <span id="tfa-secret-key"></span></p>
+			<button class="btn btn-secondary" onclick="navigateTo('dashboard')">戻る</button>
+		</div>
     </div>
 
     <script src="script.js"></script>
