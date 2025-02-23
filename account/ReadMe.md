@@ -17,7 +17,6 @@ POST /signup/
 リクエストボディ:
 {
   "username": "ユーザー名",
-  "email": "メールアドレス",
   "password": "パスワード"
 }
 
@@ -68,7 +67,7 @@ GET /profile/
   {
     "username": "ユーザー名",
     "email": "メールアドレス",
-    "other_info": "その他の情報"
+    "opt_enabled": "2fa設定かどうかのbool値"
   }
 - 失敗時 (401 Unauthorized):
   - ログインしていない場合や、無効なトークンの場合、エラーメッセージが返されます。
