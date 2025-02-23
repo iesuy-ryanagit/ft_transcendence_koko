@@ -110,10 +110,7 @@ SECRET_KEY = 'change-me-please'
 AUTH_USER_MODEL = 'user.CustomUser'  # Specify the custom user model
 
 CORS_ALLOW_ALL_ORIGINS = True
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",  # フロントエンドのURL
-#     "http://frontend:3000",   # Dockerの内部ネットワーク用
-#     "http://localhost:80",     # もしフロントエンドがポート80で動いている場合\
-#     "http://nginx:80",      # Dockerの内部ネットワーク用
-# ]
 
+OAUTH2_CLIENT_ID = 'u-s4t2ud-81923ac28a11204fc202b778f94590288865e752e6c9f23a209ae9dfc52ca486'  # 42から取得したClient ID
+OAUTH2_CLIENT_SECRET = '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'  # 42から取得したClient Secret
+OAUTH2_REDIRECT_URI = 'http://localhost:8000/oauth/callback'  # 42のOAuth2設定で設定したリダイレクトURI

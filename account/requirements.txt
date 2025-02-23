@@ -6,3 +6,4 @@ psycopg2
 Pillow
 pyotp
 pyjwt
+requests

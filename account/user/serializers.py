@@ -5,12 +5,12 @@ from django.contrib.auth import authenticate
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'avatar', 'match_history']
+        fields = ['id', 'username', 'otp_enabled']
 
 class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'password', 'avatar']
+        fields = ['username', 'password']
 
     def create(self, validated_data):
         user = CustomUser.objects.create_user(**validated_data)
