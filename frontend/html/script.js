@@ -7,6 +7,7 @@ async function login() {
     const response = await fetch(apiBase + 'login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ username, password })
     });
 
@@ -137,7 +138,8 @@ async function fetchTFAQRCode() {
             headers: {
                 "Authorization": `Bearer ${token}`, // 認証ヘッダーにJWTトークンを設定
                 "Content-Type": "application/json"
-            }
+            },
+            credentials: 'include',
         });
 
         if (!response.ok) {

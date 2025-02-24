@@ -14,17 +14,13 @@ class SetupTFAView(views.APIView):
 
     def get(self, request):
         user = request.user
-        if not TOTPDevice.objects.filter(user=user, confirmed=True).exists():
-            device = TOTPDevice.objects.create(user=user, confirmed=False)
-            uri = device.config_url
-            secret_key = device.bin_key.hex()
-            return Response(
+        device = TOTPDevice.objects.create(user=user, confirmed=False)
+        uri = device.config_url
+        secret_key = device.bin_key.hex()
+        return Response(
                 {"qr_url": uri, "secret_key": secret_key},
                 status=status.HTTP_200_OK,
             )
-        return Response(
-            {"status": "error"}, status=status.HTTP_400_BAD_REQUEST
-        )
 
     def post(self, request):
         user = request.user
