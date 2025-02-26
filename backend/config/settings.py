@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 	'tournament',
     'game',
+    'pong',
 	'rest_framework',
     'rest_framework.authtoken',
 ]
