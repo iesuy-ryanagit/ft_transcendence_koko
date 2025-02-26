@@ -45,11 +45,15 @@ def notify_tournament_match_end(match_id, winner, final_score):
         print(f"Failed to notify tournament system: {e}")
         return False
 
-@api_view(['GET'])
+@api_view(['POST', 'GET'])
 def match_start(request):
     """ゲームの初期状態を設定して返す"""
-    # トーナメントシステムからのマッチIDを取得（クエリパラメータから）
-    match_id = request.query_params.get('match_id', None)
+    # トーナメントシステムからのマッチIDを取得
+    # POSTリクエストの場合はボディから、GETリクエストの場合はクエリパラメータから取得
+    if request.method == 'POST':
+        match_id = request.data.get('match_id', None)
+    else:  # GET
+        match_id = request.query_params.get('match_id', None)
     
     # マッチIDがない場合は、デモ用のIDを生成
     if not match_id:
@@ -122,8 +126,13 @@ def match_start(request):
 @api_view(['GET', 'PATCH'])
 def match_data(request):
     """ゲームの状態を取得または更新する"""
-    # マッチIDをクエリパラメータから取得
-    match_id = request.query_params.get('match_id', None)
+    # マッチIDを取得（クエリパラメータまたはリクエストボディから）
+    if request.method == 'PATCH':
+        # PATCHリクエストの場合、ボディからmatch_idを取得（クエリパラメータも許可）
+        match_id = request.data.get('match_id') or request.query_params.get('match_id')
+    else:  # GET
+        # GETリクエストの場合、クエリパラメータからmatch_idを取得
+        match_id = request.query_params.get('match_id')
     
     if not match_id:
         return Response(
