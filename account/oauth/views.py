@@ -1,15 +1,15 @@
 from rest_framework import status, views
 from rest_framework.response import Response
 from django.conf import settings
+from user.models import CustomUser
 import requests
+from user.jwts import generate_jwt
+from django.contrib.auth import authenticate
+
 
 class OauthView(views.APIView):
 
     def get(self, request, *args, **kwargs):
-        """
-        GET /api/auth/login
-        42 OAuthの認証URLを返す
-        """
         auth_url = 'https://api.intra.42.fr/oauth/authorize'
         client_id = settings.OAUTH2_CLIENT_ID  
         client_secret = settings.OAUTH2_CLIENT_SECRET
@@ -24,10 +24,6 @@ class OauthView(views.APIView):
 
 class CallbackView(views.APIView):
     def get(self, request, *args, **kwargs):
-        """
-        GET /api/auth/callback
-        42 OAuthから返されたコードに基づいてユーザーを作成またはログイン
-        """
         error = request.GET.get('error')
         if error:
             # エラーがあればloginへリダイレクト
@@ -80,19 +76,50 @@ class CallbackView(views.APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         
         user_data = user_response.json()
-        
         # ユーザーを作成またはログイン処理（仮にユーザーIDで管理する例）
-        user_id = user_data.get('id')
         user_name = user_data.get('login')
-        
-        # ここでユーザーをデータベースに保存または更新する処理を追加できます
-        
+
+        data = {
+            'username': user_name,
+            'password': user_name,
+        }
+
+        user = authenticate(username=user_name, password=user_name)
+        if user:
+            jwt = generate_jwt(user)
+            response = Response({'status': 'success','jwt': jwt}, status=status.HTTP_200_OK)
+            response.set_cookie(
+                key="jwt",
+                value=jwt,
+                max_age=86400,
+                secure=False,
+                httponly=False,
+                samesite=None,
+            )
+            return (response)
+        else:
+            serializer = SignupSerializer(data=data)
+            if serializer.is_valid():
+                user = serializer.save()
+                jwt = generate_jwt(user)
+                response = Response({'status': 'success','jwt': jwt}, status=status.HTTP_201_CREATED)
+                response.set_cookie(
+                    key="jwt",
+                    value=jwt,
+                    max_age=86400,
+                    secure=False,
+                    httponly=False,
+                    samesite=None,
+                )
+                return response
+            else:
+                return Response({"status" : "error"}, status=status.HTTP_400_BAD_REQUEST)
         # ユーザーが正常にログインした場合、ホームページにリダイレクト
         return Response({
             "status": "success",
             "message": "User authenticated successfully",
             "user_info": {
-                "id": user_id,
                 "name": user_name,
             }
         }, status=status.HTTP_200_OK)
+        return HttpResponsePermanentRedirect('http://localhost:3000/html/index.html')

@@ -13,18 +13,27 @@ GET
 
 リターンはstatus successかerror
 
+successの場合は、42oath_urlへ
+errorの場合は、login画面へ戻るとか
+
+
 エントリーポイント
 /api/auth/callback
-successの場合は42oath_urlへ
-errorの場合はloginへ
+
+"注意"
+こいつはフロントエンドから呼ぶのではなく、/api/auth/loginでから行く42oath_urlからアクセスされるエンドポイント
 
 
 メソッド
 GET
-42のcodeを要求し、codeに基づき、42oauthからデータを取得し、ユーザーを作成またはログイン
+ユーザーを作成またはログインする
 
 リターンはstatus successかerror
 
 successの場合はhomeへ
 
 errorの場合はloginへ
+
+
+フロントエンドとしては、42oath_urlのレスポンスをゲット
+リダイレクトしてもらう

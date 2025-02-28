@@ -2,7 +2,6 @@ from pathlib import Path
 import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -24,6 +23,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     "django.contrib.sessions.middleware.SessionMiddleware",
     'django.middleware.common.CommonMiddleware',
@@ -31,12 +31,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     "django_otp.middleware.OTPMiddleware",
 ]
-
-
-JWT_SECRET_KEY = "datoukeiou"
 
 ROOT_URLCONF = 'account.urls'
 
@@ -109,8 +105,63 @@ SECRET_KEY = 'change-me-please'
 # Custom user model
 AUTH_USER_MODEL = 'user.CustomUser'  # Specify the custom user model
 
-CORS_ALLOW_ALL_ORIGINS = True
+
+
 
 OAUTH2_CLIENT_ID = 'u-s4t2ud-81923ac28a11204fc202b778f94590288865e752e6c9f23a209ae9dfc52ca486'  # 42から取得したClient ID
 OAUTH2_CLIENT_SECRET = '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'  # 42から取得したClient Secret
 OAUTH2_REDIRECT_URI = 'http://localhost:8000/oauth/callback'  # 42のOAuth2設定で設定したリダイレクトURI
+
+
+#cookie
+SECURE_SSL_REDIRECT = False  # ローカル開発環境ではHTTPSリダイレクトは不要
+CSRF_COOKIE_SECURE = False  # HTTPS接続がない場合はCSRFクッキーをセキュアにしない
+SESSION_COOKIE_SECURE = False  # セッションIDのクッキーをセキュアにしない
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",  # フロントエンドのURL
+    "http://127.0.0.1:3000",  # 127.0.0.1 を許可
+    "http://localhost:80",  # フロントエンドのURL
+    "http://127.0.0.1:80",  # 127.0.0.1 を許可
+    # "http://localhost:8000",  # APIサーバーのURL
+    # "http://127.0.0.1:8000",  # 127.0.0.1 を許可
+    # "http://localhost:80",  # フロントエンドのURL
+    # "http://127.0.0.1:80",  # 127.0.0.1 を許可
+    # "http://0.0.0.0:3000",
+    # "http://0.0.0.0:8000",
+    # "http://0.0.0.0:80",
+    # "http://127.0.0.1",
+]
+
+# settings.pyに追加
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # フロントエンドのURL
+    "http://127.0.0.1:3000",  # 127.0.0.1 を許可
+    "http://localhost:80",  # フロントエンドのURL
+    "http://127.0.0.1:80",  # 127.0.0.1 を許可
+    # "http://localhost:8000",  # APIサーバーのURL
+    # "http://127.0.0.1:8000",  # 127.0.0.1 を許可
+    # "http://localhost:80",  # フロントエンドのURL
+    # "http://127.0.0.1:80",  # 127.0.0.1 を許可
+    # "http://0.0.0.0:3000",
+    # "http://0.0.0.0:8000",
+    # "http://0.0.0.0:80",
+    # "http://127.0.0.1",
+]
+
+ALLOWED_HOSTS = [
+    'localhost', 
+    '127.0.0.1',
+]
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False
+
+# settings.py
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SAMESITE = 'None'  # 開発環境用
+CSRF_COOKIE_SAMESITE = 'None'  # 開発環境用
+# クッキー関連の設定（特に、クロスオリジンリクエストを扱う場合に重要）
+
+CORS_PREFLIGHT_MAX_AGE = 60 * 30

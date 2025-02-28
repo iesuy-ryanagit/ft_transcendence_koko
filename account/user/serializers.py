@@ -39,5 +39,25 @@ class LoginSerializer(serializers.Serializer):
 
         return data
 
+class OTPLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+    otp = serializers.CharField()
+    def validate(self, data):
+        # print("Received data in validate:", data) 
+        username = data.get('username')
+        password = data.get('password')
+        otp = data.get('otp')
+        if not username or not password or not otp: 
+            raise serializers.ValidationError({'non_field_errors': ['Invalid credentials']})
+
+        # # authenticateでユーザー認証
+        user = authenticate(username=username, password=password)
+        if user:
+            data['user'] = user  # 認証に成功したら、userをdataに追加
+        else:
+            raise serializers.ValidationError({'non_field_errors': ['Invalid credentials']})
+
+        return data
 
 
