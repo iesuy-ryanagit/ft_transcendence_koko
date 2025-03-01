@@ -28,7 +28,8 @@ def notify_tournament_match_end(match_id, winner, final_score):
     result = {
         "match_id": match_id,
         "winner": winner,
-        "final_score": final_score
+        "final_score": final_score,
+        "match_end": True
     }
     return result
 
@@ -94,7 +95,8 @@ def match_start(request):
             'width': CANVAS_WIDTH,
             'height': CANVAS_HEIGHT
         },
-        'max_score': MAX_SCORE
+        'max_score': MAX_SCORE,
+        'match_end': False
     }
     
     # タイマーが設定されている場合は追加
@@ -194,7 +196,8 @@ def match_data(request):
             game_state['game_active'] = False
             winner = 'player1' if game_state['scores']['player1'] > game_state['scores']['player2'] else 'player2'
             final_score = f"{game_state['scores']['player1']}-{game_state['scores']['player2']}"
-            
+            game_state['match_end'] = True
+
             if match_id != 'demo_game':
                 match_result = notify_tournament_match_end(match_id, winner, final_score)
                 game_state['match_result'] = match_result
