@@ -7,6 +7,7 @@ import requests, time
 from django.conf import settings
 from game.models import GameSetting
 from django.contrib.auth import get_user_model
+import random
 
 User = get_user_model()
 
@@ -24,26 +25,14 @@ DEFAULT_BALL_SPEED = 5  # デフォルトのボール速度
 
 def notify_tournament_match_end(match_id, winner, final_score):
     """トーナメントシステムにマッチ終了を通知する"""
-    # 実際の実装では、トーナメントシステムのAPIを呼び出す
-    # この関数はデモ用で、実際の実装では適切なAPIエンドポイントを呼び出す
-    try:
-        # 例: トーナメントシステムのマッチ終了エンドポイントを呼び出す
-        # response = requests.post(
-        #     f"{settings.API_BASE_URL}/api/match/end/",
-        #     json={
-        #         "match_id": match_id,
-        #         "winner": winner,
-        #         "final_score": final_score
-        #     }
-        # )
-        # return response.status_code == 200
-        
-        # デモ用に成功を返す
-        print(f"Match {match_id} ended: Winner {winner}, Score {final_score}")
-        return True
-    except Exception as e:
-        print(f"Failed to notify tournament system: {e}")
-        return False
+    result = {
+        "match_id": match_id,
+        "winner": winner,
+        "final_score": final_score
+    }
+    return result
+
+
 
 @api_view(['POST', 'GET'])
 def match_start(request):
@@ -154,11 +143,10 @@ def match_data(request):
         update_data = request.data
         game_state = game_states[match_id]
         
-        # パドルの位置更新
+        # パドルの位置のみ更新（フロントエンドから受け取る）
         if 'paddles' in update_data:
             for player, paddle_data in update_data['paddles'].items():
                 if player in game_state['paddles']:
-                    # Y座標の制限を設定
                     if 'y' in paddle_data:
                         paddle_data['y'] = max(0, min(
                             paddle_data['y'],
@@ -166,37 +154,58 @@ def match_data(request):
                         ))
                     game_state['paddles'][player].update(paddle_data)
         
-        # ボールの位置更新
-        if 'ball' in update_data:
-            game_state['ball'].update(update_data['ball'])
+        # ボールの位置を計算
+        ball = game_state['ball']
+        next_x = ball['x'] + ball['dx']
+        next_y = ball['y'] + ball['dy']
         
-        # スコアの更新
-        if 'scores' in update_data:
-            game_state['scores'].update(update_data['scores'])
-            
-            # スコアが最大値に達したらゲーム終了
-            if (game_state['scores']['player1'] >= MAX_SCORE or 
-                game_state['scores']['player2'] >= MAX_SCORE):
-                
-                # 勝者を決定
-                winner = 'player1' if game_state['scores']['player1'] > game_state['scores']['player2'] else 'player2'
-                final_score = f"{game_state['scores']['player1']}-{game_state['scores']['player2']}"
-                
-                # ゲーム状態を更新
-                game_state['game_active'] = False
-                
-                # トーナメントシステムに通知（実際のマッチIDの場合のみ）
-                if match_id != 'demo_game':
-                    notify_tournament_match_end(match_id, winner, final_score)
+        # 壁との衝突判定
+        if next_y <= 0 or next_y >= CANVAS_HEIGHT:
+            ball['dy'] *= -1
+            next_y = ball['y'] + ball['dy']
         
-        # ゲーム状態の更新
-        if 'game_active' in update_data:
-            game_state['game_active'] = update_data['game_active']
+        # パドルとの衝突判定
+        for player, paddle in game_state['paddles'].items():
+            if (next_x <= paddle['x'] + paddle['width'] and 
+                next_x >= paddle['x'] and 
+                next_y >= paddle['y'] and 
+                next_y <= paddle['y'] + paddle['height']):
+                ball['dx'] *= -1
+                next_x = ball['x'] + ball['dx']
+                break
+        
+        # ボールの位置を更新
+        ball['x'] = next_x
+        ball['y'] = next_y
+        
+        # 得点判定
+        if next_x <= 0:
+            # player2の得点
+            game_state['scores']['player2'] += 1
+            reset_ball_position(game_state)
+        elif next_x >= CANVAS_WIDTH:
+            # player1の得点
+            game_state['scores']['player1'] += 1
+            reset_ball_position(game_state)
+        
+        # ゲーム終了判定
+        if (game_state['scores']['player1'] >= MAX_SCORE or 
+            game_state['scores']['player2'] >= MAX_SCORE):
+            game_state['game_active'] = False
+            winner = 'player1' if game_state['scores']['player1'] > game_state['scores']['player2'] else 'player2'
+            final_score = f"{game_state['scores']['player1']}-{game_state['scores']['player2']}"
             
-            # ゲームが終了した場合、トーナメントシステムに通知
-            if not game_state['game_active'] and match_id != 'demo_game':
-                winner = 'player1' if game_state['scores']['player1'] > game_state['scores']['player2'] else 'player2'
-                final_score = f"{game_state['scores']['player1']}-{game_state['scores']['player2']}"
-                notify_tournament_match_end(match_id, winner, final_score)
+            if match_id != 'demo_game':
+                match_result = notify_tournament_match_end(match_id, winner, final_score)
+                game_state['match_result'] = match_result
         
         return JsonResponse(game_state)
+
+def reset_ball_position(game_state):
+    """ボールを中央に戻し、ランダムな方向に設定"""
+    game_state['ball'].update({
+        'x': CANVAS_WIDTH / 2,
+        'y': CANVAS_HEIGHT / 2,
+        'dx': DEFAULT_BALL_SPEED * (1 if random.random() > 0.5 else -1),
+        'dy': DEFAULT_BALL_SPEED * (1 if random.random() > 0.5 else -1)
+    })
