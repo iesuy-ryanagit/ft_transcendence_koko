@@ -1,54 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanilla JS App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>トーナメント管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="app">
-        <h1>Loading...</h1>
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="#">トーナメント管理</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav ms-auto">
+					<li class="nav-item">
+						<a class="nav-link disabled" href="#" id="nav-dashboard" onclick="navigateTo('dashboard')">ダッシュボード</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link disabled" href="#" id="nav-profile" onclick="navigateTo('profile')">プロフィール</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link disabled" href="#" id="nav-tfasign" onclick="showTFARegister()">2FA登録</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link disabled" href="#" id="nav-logout" onclick="logout()">ログアウト</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+	
+
+    <div class="container mt-5">
+        <!-- サインアップ画面 -->
+        <div id="login" class="page">
+            <h2>ログイン</h2>
+            <input type="text" class="form-control auth-input" id="login-username" placeholder="ユーザー名">
+            <input type="password" class="form-control auth-input" id="login-password" placeholder="パスワード">
+            <button class="btn btn-primary w-100" onclick="login()">ログイン</button>
+            <button class="btn btn-secondary w-100 mt-2" onclick="navigateTo('signup')">新規登録</button>
+        </div>
+
+        <!-- 新規登録画面 -->
+        <div id="signup" class="page d-none">
+            <h2>新規登録</h2>
+            <input type="text" class="form-control auth-input" id="signup-username" placeholder="ユーザー名">
+            <input type="password" class="form-control auth-input" id="signup-password" placeholder="パスワード">
+            <button class="btn btn-primary w-100" onclick="signUp()">登録</button>
+            <button class="btn btn-secondary w-100 mt-2" onclick="navigateTo('login')">ログイン画面へ</button>
+        </div>
+
+        <!-- ダッシュボード -->
+        <div id="dashboard" class="page d-none">
+            <h2>トーナメント一覧</h2>
+            <button class="btn btn-success" onclick="navigateTo('create-tournament')">新規トーナメント作成</button>
+            <div class="list-group mt-3" id="tournament-list"></div>
+        </div>
+
+        <!-- トーナメント作成画面 -->
+        <div id="create-tournament" class="page d-none">
+            <h2>新規トーナメント作成</h2>
+            <input type="text" class="form-control my-2" id="tournament-name" placeholder="トーナメント名">
+            <button class="btn btn-primary" onclick="createTournament()">作成</button>
+            <button class="btn btn-secondary" onclick="navigateTo('dashboard')">戻る</button>
+        </div>
+
+        <!-- 試合結果入力画面 -->
+        <div id="match-result" class="page d-none">
+            <h2>試合結果入力</h2>
+            <div id="match-list"></div>
+            <button class="btn btn-primary" onclick="saveResults()">保存</button>
+            <button class="btn btn-secondary" onclick="navigateTo('dashboard')">戻る</button>
+        </div>
+
+        <!-- プロフィール画面 -->
+        <div id="profile" class="page d-none">
+            <h2>プロフィール</h2>
+            <p><strong>ユーザー名:</strong> <span id="profile-username">未ログイン</span></p>
+            <button class="btn btn-secondary" onclick="navigateTo('dashboard')">戻る</button>
+        </div>
+
+		<!--2FA登録画面-->
+		<div id="2FA-register" class="page d-none">
+			<h2>2FAの設定</h2>
+			<p>以下のQRコードをGoogle Authenticatorなどのアプリでスキャンしてください。</p>
+			<img id="tfa-qr-image" src="" alt="2FA QRコード" class="img-fluid">
+			<p><strong>シークレットキー:</strong> <span id="tfa-secret-key"></span></p>
+			<button class="btn btn-secondary" onclick="navigateTo('dashboard')">戻る</button>
+		</div>
     </div>
-    <script>
-        async function fetchHtml(url) {
-            console.log("Function fetchHtml started");  // 関数の開始を表示
-            const defaultOptions = {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json", // デフォルトのヘッダー
-                },
-            };
 
-            try {
-                // fetchを実行
-                const response = await fetch(url, defaultOptions);
-
-                // エラーハンドリング
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error("API Error:", errorData);
-                    throw new Error(`HTTP Error: ${response.status}`);
-                }
-
-                console.log("API Success:", response);
-                return response.text();
-            } catch (error) {
-                console.error("Fetch Error:", error);
-                return `<h1 data-i18n="common:page_not_found">Page not found.</h1>`;
-            }
-        }
-
-        window.onload = async function() {
-            console.log("Function window.onload started");  // 関数の開始を表示
-            const appDiv = document.getElementById("app");
-
-            try {
-                const htmlContent = await fetchHtml("http://localhost:8000/myapp/");
-                appDiv.innerHTML = htmlContent;
-            } catch (error) {
-                appDiv.innerHTML = `<h1>Error: ${error.message}</h1>`;
-            }
-        };
-    </script>
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
