@@ -18,6 +18,6 @@ EXPOSE 8000
 RUN chmod +x /app/entry-point.sh
 
 # マイグレーションを実行する（`docker-entrypoint.sh`などを用意しても良い）
-# ENTRYPOINT ["/app/entry-point.sh"]
+ENTRYPOINT ["/app/entry-point.sh"]
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
