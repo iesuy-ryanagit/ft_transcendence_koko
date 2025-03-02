@@ -1,9 +1,10 @@
 django
 djangorestframework
 django-cors-headers
-djangorestframework-simplejwt
 django-otp
 psycopg2
-jwt
 Pillow
 pyotp
+pyjwt
+requests
+gunicorn
