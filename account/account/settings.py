@@ -2,7 +2,6 @@ from pathlib import Path
 import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Application definition
 
@@ -15,28 +14,25 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_simplejwt',
     'user',
     'django_otp',
     'django_otp.plugins.otp_totp',
+    'django_otp.plugins.otp_static',
+    'django_otp.plugins.otp_email',
     'corsheaders',
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
-    # "django.contrib.sessions.middleware.SessionMiddleware",
-    "user.middleware.CustomSessionMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    "django_otp.middleware.OTPMiddleware",
 ]
-
-
-JWT_SECRET_KEY = "datoukeiou"
-SECRET_KEY = "datoumitakai"
 
 ROOT_URLCONF = 'account.urls'
 
@@ -60,16 +56,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'account.wsgi.application'
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "postgres",
+#         "USER": "postgres",
+#         "PASSWORD": "postgres",
+#         "HOST": "db",
+#         "PORT": "5432",
+#     }
+# }
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
-        "HOST": "db",
-        "PORT": "5432",
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',  # SQLite database file located in the base directory
     }
 }
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -101,11 +105,49 @@ SECRET_KEY = 'change-me-please'
 # Custom user model
 AUTH_USER_MODEL = 'user.CustomUser'  # Specify the custom user model
 
-CORS_ALLOW_ALL_ORIGINS = True
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",  # フロントエンドのURL
-#     "http://frontend:3000",   # Dockerの内部ネットワーク用
-#     "http://localhost:80",     # もしフロントエンドがポート80で動いている場合\
-#     "http://nginx:80",      # Dockerの内部ネットワーク用
-# ]
 
+
+
+OAUTH2_CLIENT_ID = 'u-s4t2ud-81923ac28a11204fc202b778f94590288865e752e6c9f23a209ae9dfc52ca486'  # 42から取得したClient ID
+OAUTH2_CLIENT_SECRET = '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'  # 42から取得したClient Secret
+OAUTH2_REDIRECT_URI = 'http://localhost:8000/oauth/callback'  # 42のOAuth2設定で設定したリダイレクトURI
+
+
+#cookie
+SECURE_SSL_REDIRECT = False  # ローカル開発環境ではHTTPSリダイレクトは不要
+CSRF_COOKIE_SECURE = False  # HTTPS接続がない場合はCSRFクッキーをセキュアにしない
+SESSION_COOKIE_SECURE = False  # セッションIDのクッキーをセキュアにしない
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",  # フロントエンドのURL
+    "http://127.0.0.1:3000",  # 127.0.0.1 を許可
+    "http://localhost:80",  # フロントエンドのURL
+    "http://127.0.0.1:80",  # 127.0.0.1 を許可
+    "https://localhost",
+]
+
+# settings.pyに追加
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # フロントエンドのURL
+    "http://127.0.0.1:3000",  # 127.0.0.1 を許可
+    "http://localhost:80",  # フロントエンドのURL
+    "http://127.0.0.1:80",  # 127.0.0.1 を許可
+    "https://localhost",
+]
+
+ALLOWED_HOSTS = [
+    'localhost', 
+    '127.0.0.1',
+]
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False
+
+# settings.py
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SAMESITE = 'None'  # 開発環境用
+CSRF_COOKIE_SAMESITE = 'None'  # 開発環境用
+# クッキー関連の設定（特に、クロスオリジンリクエストを扱う場合に重要）
+
+CORS_PREFLIGHT_MAX_AGE = 60 * 30
