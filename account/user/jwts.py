@@ -22,8 +22,6 @@ class JWTAuthentication(BaseAuthentication):
     def authenticate(self, request):
         try:
             token = request.COOKIES.get("jwt")
-            print("jwt:")
-            print(token)
             if not token:
                 return None
 
@@ -35,11 +33,11 @@ class JWTAuthentication(BaseAuthentication):
                 user = CustomUser.objects.get(pk=userid)
                 return (user, token)
             except CustomUser.DoesNotExist:
-                raise exceptions.AuthenticationFailed("Invalid token: user not exist in db")
+                raise exceptions.AuthenticationFailed("Invalid token: user not found")
         except jwt.ExpiredSignatureError:
-            raise exceptions.AuthenticationFailed("Invalid token: too late")
+            raise exceptions.AuthenticationFailed("Invalid token: expired")
         except jwt.InvalidTokenError:
-            raise exceptions.AuthenticationFailed("Invalid token: cannnot decode")
+            raise exceptions.AuthenticationFailed("Invalid token: failed to  decode")
         except Exception as e:
             raise exceptions.AuthenticationFailed(f"token error: {str(e)}")
 
