@@ -11,7 +11,30 @@ services:
     env_file: .env
     environment:
       - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,frontend,db
-
+  backendgame:
+    build: ./backendgame
+    container_name: backendgame
+    networks:
+      - app-network
+    volumes:
+      - ./backendgame:/app
+    ports:
+      - "8001:8001"
+    env_file: .env
+    environment:
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,frontend,db
+  backendtournament:
+    build: ./backendtournament
+    container_name: backendtournament
+    networks:
+      - app-network
+    volumes:
+      - ./backendtournament:/app
+    ports:
+      - "8002:8002"
+    env_file: .env
+    environment:
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,frontend,db
 #   db:
 #     build:
 #       context: ./db
