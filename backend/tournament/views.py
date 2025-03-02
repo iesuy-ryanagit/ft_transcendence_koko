@@ -64,7 +64,7 @@ class JoinTournamentParticipantView(APIView):
             tournament = participant.tournament
 
             if tournament.tournament_participants.count() >= tournament.max_participants:
-                create_tournament_schedule(tournament)
+                    create_tournament_schedule(tournament)
             return Response(
                 {
                     "message": "Joined tournament participant successfully",
