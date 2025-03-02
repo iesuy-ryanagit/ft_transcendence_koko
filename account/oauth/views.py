@@ -7,7 +7,7 @@ from user.jwts import generate_jwt
 from django.contrib.auth import authenticate
 
 
-class OauthView(views.APIView):
+class OauthUrlView(views.APIView):
 
     def get(self, request, *args, **kwargs):
         auth_url = 'https://api.intra.42.fr/oauth/authorize'
@@ -22,16 +22,8 @@ class OauthView(views.APIView):
             "42oauth_url": auth_url,
         }, status=status.HTTP_200_OK)
 
-class CallbackView(views.APIView):
+class OauthLoginView(views.APIView):
     def get(self, request, *args, **kwargs):
-        error = request.GET.get('error')
-        if error:
-            # エラーがあればloginへリダイレクト
-            return Response({
-            "status": "errror",
-                "message": "request get error",
-        }, status=status.HTTP_400_BAD_REQUEST)
-        
         code = request.GET.get('code')
         if not code:
             # codeがない場合はエラー
@@ -114,12 +106,3 @@ class CallbackView(views.APIView):
                 return response
             else:
                 return Response({"status" : "error"}, status=status.HTTP_400_BAD_REQUEST)
-        # ユーザーが正常にログインした場合、ホームページにリダイレクト
-        return Response({
-            "status": "success",
-            "message": "User authenticated successfully",
-            "user_info": {
-                "name": user_name,
-            }
-        }, status=status.HTTP_200_OK)
-        return HttpResponsePermanentRedirect('http://localhost:3000/html/index.html')

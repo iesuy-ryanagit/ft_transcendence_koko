@@ -24,19 +24,17 @@ class LoginSerializer(serializers.Serializer):
         # print("Received data in validate:", data) 
         username = data.get('username')
         password = data.get('password')
-
         # # ユーザー名とパスワードの検証
         print("Received data in validate:", data) 
         if not username or not password:
             raise serializers.ValidationError({'non_field_errors': ['Invalid credentials']})
-
         # # authenticateでユーザー認証
         user = authenticate(username=username, password=password)
+
         if user:
             data['user'] = user  # 認証に成功したら、userをdataに追加
         else:
             raise serializers.ValidationError({'non_field_errors': ['Invalid credentials']})
-
         return data
 
 class OTPLoginSerializer(serializers.Serializer):
@@ -57,7 +55,7 @@ class OTPLoginSerializer(serializers.Serializer):
             data['user'] = user  # 認証に成功したら、userをdataに追加
         else:
             raise serializers.ValidationError({'non_field_errors': ['Invalid credentials']})
-
+        print("success authenticate")
         return data
 
 

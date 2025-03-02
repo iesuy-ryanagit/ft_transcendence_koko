@@ -34,7 +34,7 @@ class SetupTFAView(views.APIView):
         user.save()
         return Response({"status": "success"}, status=status.HTTP_200_OK)
 
-class VerifyOTPView(views.APIView):
+class LoginTFAView(views.APIView):
     def post(self, request):
         serializer = OTPLoginSerializer(data=request.data)
         if not serializer.is_valid():
@@ -81,18 +81,18 @@ class SignupView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(views.APIView):
-    # def get(self, request, *args, **kwargs):
-    #     jwt = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-    #     response = Response({'status': 'success','jwt': jwt}, status=status.HTTP_200_OK)
-    #     response.set_cookie(
-    #         key="jwt",
-    #         value=jwt,
-    #         max_age=86400,
-    #         secure=True,
-    #         httponly=True,
-    #         samesite=None,
-    #         )
-    #     return response
+    def get(self, request, *args, **kwargs):
+        jwt = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        response = Response({'status': 'success','jwt': jwt}, status=status.HTTP_200_OK)
+        response.set_cookie(
+            key="jwt",
+            value=jwt,
+            max_age=86400,
+            secure=True,
+            httponly=True,
+            samesite=None,
+            )
+        return response
     def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -121,7 +121,7 @@ class LogoutView(views.APIView):
     permission_classes = [
         IsAuthenticated,
     ]
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         response.delete_cookie("jwt")
         return Response({'status': 'success'}, status=status.HTTP_200_OK)
 

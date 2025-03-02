@@ -8,3 +8,4 @@ pyotp
 pyjwt
 requests
 gunicorn
+django-sslserver
