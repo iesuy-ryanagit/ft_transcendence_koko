@@ -1,5 +1,13 @@
 const apiBase = 'http://localhost:8000/api/';
 
+$(window).on("popstate", function (event) {
+    // 現在のURLのハッシュ部分を取得して、適切なページに遷移
+    const page = location.hash.replace('#', '') || 'login-base';
+    console.log('Popstate triggered, navigating to:', page);
+    navigateTo(page, false); // ここでページ遷移を呼び出し
+});
+
+
 async function login() {
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
@@ -16,12 +24,70 @@ async function login() {
         localStorage.setItem('access_token', data.jwt);
         localStorage.setItem('username', username);
 		document.cookie = `jwt=${data.jwt}; path=/; max-age=86400; SameSite=Lax`;
+		await fetchUserProfile();
 		enableNavigation(true);
         navigateTo('dashboard');
     } else {
         alert('ログイン失敗: ' + (data.message || 'サーバーエラー'));
     }
 }
+
+async function fetchUserProfile() {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        console.warn('アクセストークンがありません');
+        return;
+    }
+
+    try {
+        const response = await fetch(apiBase + 'profile/', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` },
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'プロフィール取得に失敗しました');
+        }
+
+        // プロフィール情報を保存
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('email', data.email);
+        localStorage.setItem('opt', data.otp_enabled);
+
+        console.log('プロフィール情報:', data);
+
+    } catch (error) {
+        console.error('プロフィール取得エラー:', error);
+    }
+}
+
+async function loginWith2FA() {
+    const username = document.getElementById('tfalogin-username').value;
+    const password = document.getElementById('tfalogin-password').value;
+    const code = document.getElementById('tfalogin-token').value;
+
+    const response = await fetch(apiBase + 'tfa-login/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, password, code })
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+        localStorage.setItem('access_token', data.jwt);
+        localStorage.setItem('username', username);
+        document.cookie = `jwt=${data.jwt}; path=/; max-age=86400; SameSite=Lax`;
+        await fetchUserProfile();
+        enableNavigation(true);
+        navigateTo('dashboard');
+    } else {
+        alert('2FAログイン失敗: ' + (data.message || 'サーバーエラー'));
+    }
+}
+
 
 // サインアップ処理
 async function signUp() {
@@ -42,6 +108,21 @@ async function signUp() {
     }
 }
 
+// セットアップ2FA処理
+async function setUpTfa() {
+    const response = await fetch(apiBase + 'setup-tfa/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+        alert('セットアップ成功!');
+    } else {
+        alert('セットアップ失敗: ' + data.message);
+    }
+}
+
 function enableNavigation(enable) {
     document.getElementById('nav-dashboard').classList.toggle('disabled', !enable);
     document.getElementById('nav-profile').classList.toggle('disabled', !enable);
@@ -51,6 +132,7 @@ function enableNavigation(enable) {
 
 // 画面遷移関数
 function navigateTo(page, addHistory = true) {
+    alert('navigate called: ');
     // すべての画面を非表示にする
     document.querySelectorAll('.page').forEach(page => page.classList.add('d-none'));
 
@@ -66,8 +148,12 @@ function navigateTo(page, addHistory = true) {
         document.getElementById('create-tournament').classList.remove('d-none');
     } else if (page === 'match-result') {
         document.getElementById('match-result').classList.remove('d-none');
-    } else if (page == '2FA-register'){
-		document.getElementById('2FA-register').classList.remove('d-none');
+    } else if (page == 'TFAregister'){
+		document.getElementById('TFAregister').classList.remove('d-none');
+	} else if (page = 'loginSelection'){
+		document.getElementById('loginSelection').classList.remove('d-none');
+	} else if (page === 'tfalogin') {
+        document.getElementById('tfalogin').classList.remove('d-none');
 	}
 
     // ブラウザ履歴を追加
@@ -133,7 +219,7 @@ async function fetchTFAQRCode() {
     }
 
     try {
-        const response = await fetch(apiBase + 'signup-tfa/', {
+        const response = await fetch(apiBase + 'setup-tfa/', {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`, // 認証ヘッダーにJWTトークンを設定
@@ -148,6 +234,7 @@ async function fetchTFAQRCode() {
         }
 
         const data = await response.json();
+		console.log("APIレスポンス:", data);
         displayQRCode(data.qr_url, data.secret_key);
 
     } catch (error) {
@@ -155,10 +242,47 @@ async function fetchTFAQRCode() {
     }
 }
 
+async function sendTFAExitRequest() {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+        console.warn("アクセストークンがありません。");
+        return;
+    }
+
+    try {
+        console.log("2FA終了リクエスト送信中...");
+
+        const response = await fetch(apiBase + 'signup-tfa/',  {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            credentials: 'include',  // 必要なら追加
+            body: JSON.stringify({ action: "exit_2fa" }) 
+        });
+
+        console.log("APIレスポンス:", response);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "APIリクエストに失敗しました");
+        }
+
+        console.log("2FA終了リクエスト送信成功");
+    } catch (error) {
+        console.error("エラー:", error);
+    }
+}
+
 
 // 画面切り替え関数
 function showLogin(addHistory = true) {
     navigateTo('login', addHistory);
+}
+
+function showLoginSelect(addHistory = true){
+	navigateTo('loginSelect', addHistory);
 }
 
 function showSignUp(addHistory = true) {
@@ -177,36 +301,71 @@ function showMatchResult(addHistory = true) {
     navigateTo('match-result', addHistory);
 }
 
-function showTFARegister(addHistory = true) {
-    fetchTFAQRCode();
-    navigateTo('2FA-register', addHistory);
+async function showTFARegister(addHistory = true) {
+    await fetchTFAQRCode(); // QRコード取得を待つ
+    navigateTo('TFAregister', addHistory);
+
+    // 2FA登録画面が表示されたらボタンを取得
+    const observer = new MutationObserver((mutations, obs) => {
+        const backButton = document.querySelector("#TFAregister .btn-secondary");
+        if (backButton && !document.getElementById('TFAregister').classList.contains('d-none')) {
+            console.log("戻るボタンが見つかりました");
+            backButton.addEventListener("click", async function () {
+                console.log("戻るボタンクリック: 2FA終了リクエストを送信");
+                await sendTFAExitRequest();
+                navigateTo("dashboard");
+            });
+            obs.disconnect(); // イベント登録後に監視を停止
+        }
+    });
+
+    observer.observe(document.getElementById('TFAregister'), { attributes: true, attributeFilter: ['class'] });
 }
 
-function displayQRCode(qrUrl, secretKey) {
-    document.getElementById("tfa-qr-image").src = qrUrl; // QRコード画像を表示
-    document.getElementById("tfa-secret-key").textContent = secretKey; // シークレットキーを表示
-    document.getElementById("2FA-register").classList.remove("d-none"); // 2FA登録画面を表示
+
+function displayQRCode(otpAuthUrl, secretKey) {
+    console.log("OTP Auth URL:", otpAuthUrl); // デバッグ用
+    
+    document.getElementById("tfa-secret-key").textContent = secretKey;
+    document.getElementById("TFAregister").classList.remove("d-none");
+
+    const qrContainer = document.getElementById("tfa-qr-image");
+
+    // 前のQRコードを削除
+    qrContainer.innerHTML = "";
+
+    // QRコードを生成
+    new QRCode(qrContainer, {
+        text: otpAuthUrl,
+        width: 200,
+        height: 200
+    });
 }
+
 
 // ログアウト処理
 function logout() {
     localStorage.removeItem('access_token');
     enableNavigation(false);
-    showLogin(true);
+    showLoginSelect(true);
 }
 
 
 // ページ読み込み時の処理（URLの `#` を元に復元）
 document.addEventListener('DOMContentLoaded', () => {
+    const backButton = document.querySelector("#TFAregister .btn-secondary");
+
+    if (backButton) {
+        backButton.addEventListener("click", async function () {
+            await sendTFAExitRequest();
+            navigateTo("dashboard");
+        });
+    }
+
     const token = localStorage.getItem('access_token');
     enableNavigation(!!token);
-    const page = location.hash.replace('#', '') || 'login';
-    navigateTo(token ? page : 'login', false);
-});
 
-
-// 初回ロード時にURLの `#` に応じて画面を表示
-document.addEventListener('DOMContentLoaded', () => {
-    const page = location.hash.replace('#', '') || 'login';
-    navigateTo(page, false);
+    // 初回ロード時にURLの `#` に応じて画面を表示
+    const page = location.hash.replace('#', '') || 'loginSelection';
+    navigateTo(token ? page : 'loginSelection', false);
 });

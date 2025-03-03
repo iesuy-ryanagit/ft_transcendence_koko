@@ -55,9 +55,8 @@ class LoginTFAView(views.APIView):
                 "username": user,
                 "password":password
             }
-            logserializer = LoginSerializer(data)
-            if logserializer.is_valid():
-                user = serializer.validated_data["user"]
+            user = authenticate(username=user, password=password)
+            if user:
                 jwt = generate_jwt(user)
                 response = Response({'status': 'success','jwt': jwt}, status=status.HTTP_200_OK)
                 response.set_cookie(
@@ -69,7 +68,9 @@ class LoginTFAView(views.APIView):
                     samesite=None,
                 )
                 return response
-        return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
+            else :
+                return Response({"detail": "not valid password"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "invalid otp"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SignupView(views.APIView):
