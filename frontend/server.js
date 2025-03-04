@@ -3,7 +3,8 @@ const fs = require('fs');
 const path = require('path');
 
 const server = http.createServer((req, res) => {
-  const filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url); // デフォルトはindex.html
+    const basePath = req.url.split('?')[0];  // '?' より前の部分だけを取得
+    const filePath = path.join(__dirname, basePath === '/' ? '/home/index.html' : basePath);
 
   fs.readFile(filePath, (err, data) => {
     if (err) {
