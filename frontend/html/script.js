@@ -66,13 +66,13 @@ async function fetchUserProfile() {
 async function loginWith2FA() {
     const username = document.getElementById('tfalogin-username').value;
     const password = document.getElementById('tfalogin-password').value;
-    const code = document.getElementById('tfalogin-token').value;
+    const otp = document.getElementById('tfalogin-token').value;
 
-    const response = await fetch(apiBase + 'tfa-login/', {
+    const response = await fetch(apiBase + 'login-tfa/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ username, password, code })
+        body: JSON.stringify({ username, password, otp })
     });
 
     const data = await response.json();
@@ -84,9 +84,87 @@ async function loginWith2FA() {
         enableNavigation(true);
         navigateTo('dashboard');
     } else {
-        alert('2FAログイン失敗: ' + (data.message || 'サーバーエラー'));
+        alert('2FAログイン失敗: ' + (data.detail || 'サーバーエラー'));
     }
 }
+
+//外部リンクへ飛ぶ
+async function Goto42Oauth() {
+    try {
+        // FetchでURLを取得
+        const response = await fetch(apiBase + 'oauth/url42/', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+        });
+        // レスポンスが正常かどうかをチェック
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        // レスポンスをJSONとしてパース
+        const data = await response.json();
+
+        // 取得したURLでリダイレクト
+        if (data && data.oauth_url) {
+            window.location.href = data.oauth_url; // レスポンスのURLにリダイレクト
+        } else {
+            console.error('URL not found in response');
+        }
+
+    } catch (error) {
+        // エラー時にエラーメッセージを表示
+        alert('リダイレクト失敗: ' + error.message || 'サーバーエラー');
+    }
+}
+
+
+//外部リンクから取得したcodeでログインする
+async function loginWith42Oauth() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');  // 'code'を変数に格納
+
+    if (code) {
+        try {
+            const response = await fetch(apiBase + 'oauth/login42/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ code })  // codeをJSONで送信
+            });
+
+            // レスポンスが正常かどうかを確認
+            if (!response.ok) {
+                throw new Error(`Failed to login: ${response.statusText}`);
+            }
+
+            const data = await response.json();  // JSON形式でレスポンスを取得
+
+            // JWTの保存（セキュリティ考慮）
+            if (data.jwt) {
+                localStorage.setItem('access_token', data.jwt);
+                document.cookie = `jwt=${data.jwt}; path=/; max-age=86400; Secure; SameSite=Lax`; // セキュアなクッキーに保存
+            } else {
+                throw new Error('JWT not found in the response');
+            }
+
+            // ユーザープロフィールを取得し、ナビゲーションを有効化
+            await fetchUserProfile();
+            enableNavigation(true);
+
+            // ダッシュボードに遷移
+            navigateTo('dashboard');
+        } catch (error) {
+            // エラーハンドリング
+            console.error('Error during login or signup:', error.message);
+            alert('ログインに失敗しました。再度お試しください。');
+        }
+    } else {
+        console.error('No code found in the URL');
+        alert('認証に必要なcodeがURLに含まれていません。');
+    }
+}
+
 
 
 // サインアップ処理
@@ -108,11 +186,16 @@ async function signUp() {
     }
 }
 
+
+
+
 // セットアップ2FA処理
 async function setUpTfa() {
+
     const response = await fetch(apiBase + 'setup-tfa/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'  // 必要なら追加
     });
 
     const data = await response.json();
@@ -132,12 +215,13 @@ function enableNavigation(enable) {
 
 // 画面遷移関数
 function navigateTo(page, addHistory = true) {
-    alert('navigate called: ');
     // すべての画面を非表示にする
     document.querySelectorAll('.page').forEach(page => page.classList.add('d-none'));
-
     // 表示するページを決定
-    if (page === 'login') {
+    if (page === 'tfalogin') {
+        document.getElementById('tfalogin').classList.remove('d-none');
+	}
+    else if (page === 'login') {
         document.getElementById('login').classList.remove('d-none');
     } else if (page === 'signup') {
         document.getElementById('signup').classList.remove('d-none');
@@ -152,9 +236,9 @@ function navigateTo(page, addHistory = true) {
 		document.getElementById('TFAregister').classList.remove('d-none');
 	} else if (page = 'loginSelection'){
 		document.getElementById('loginSelection').classList.remove('d-none');
-	} else if (page === 'tfalogin') {
-        document.getElementById('tfalogin').classList.remove('d-none');
-	}
+	} else if (page == 'oauth42'){
+		document.getElementById('oauth42').classList.remove('d-none');  
+    }
 
     // ブラウザ履歴を追加
     if (addHistory) {

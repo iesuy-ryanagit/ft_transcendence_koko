@@ -5,6 +5,7 @@ from user.models import CustomUser
 import requests
 from user.jwts import generate_jwt
 from django.contrib.auth import authenticate
+from user.serializers import SignupSerializer
 
 
 class OauthUrlView(views.APIView):
@@ -19,12 +20,12 @@ class OauthUrlView(views.APIView):
         # OAuth URLをレスポンスで返す
         return Response({
             "status": "success",
-            "42oauth_url": auth_url,
+            "oauth_url": auth_url,
         }, status=status.HTTP_200_OK)
 
 class OauthLoginView(views.APIView):
-    def get(self, request, *args, **kwargs):
-        code = request.GET.get('code')
+    def post(self, request, *args, **kwargs):
+        code = request.data.get('code')
         if not code:
             # codeがない場合はエラー
             return Response({
@@ -37,7 +38,6 @@ class OauthLoginView(views.APIView):
         client_secret = settings.OAUTH2_CLIENT_SECRET
         redirect_uri = settings.OAUTH2_REDIRECT_URI
         token_url = "https://api.intra.42.fr/oauth/token"
-        
         # トークンを取得
         data = {
             'grant_type': 'authorization_code',
@@ -46,7 +46,7 @@ class OauthLoginView(views.APIView):
             'code': code,
             'redirect_uri': redirect_uri
         }
-        
+    
         response = requests.post(token_url, data=data)
         
         if response.status_code != 200:
@@ -54,13 +54,11 @@ class OauthLoginView(views.APIView):
                 "status": "error",
                 "message": "Failed to obtain access token"
             }, status=status.HTTP_400_BAD_REQUEST)
-        
         # トークンを取得したら、ユーザー情報を取得
         access_token = response.json().get('access_token')
         user_url = "https://api.intra.42.fr/v2/me"
         headers = {"Authorization": f"Bearer {access_token}"}
         user_response = requests.get(user_url, headers=headers)
-        
         if user_response.status_code != 200:
             return Response({
                 "status": "error",
@@ -70,12 +68,10 @@ class OauthLoginView(views.APIView):
         user_data = user_response.json()
         # ユーザーを作成またはログイン処理（仮にユーザーIDで管理する例）
         user_name = user_data.get('login')
-
         data = {
             'username': user_name,
             'password': user_name,
         }
-
         user = authenticate(username=user_name, password=user_name)
         if user:
             jwt = generate_jwt(user)
