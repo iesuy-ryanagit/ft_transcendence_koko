@@ -90,27 +90,34 @@ async function loginWith2FA() {
 
 //外部リンクへ飛ぶ
 async function Goto42Oauth() {
-    alert('リダイレクト失敗: ' + (data.detail || 'サーバーエラー'));
-    // FetchでURLを取得
-    fetch(apiBase + 'oauth/url42/')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json(); // JSONレスポンスをパース
-        })
-        .then(data => {
-            // 取得したURLでリダイレクト
-            if (data && data.oauth_url) {
-                window.location.href = data.oauth_url; // レスポンスのURLにリダイレクト
-            } else {
-                console.error('URL not found in response');
-            }
-        })
-        .catch(error => {
-            alert('リダイレクト失敗: ' + (data.detail || 'サーバーエラー'));
+    try {
+        // FetchでURLを取得
+        const response = await fetch(apiBase + 'oauth/url42/', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
         });
+        // レスポンスが正常かどうかをチェック
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        // レスポンスをJSONとしてパース
+        const data = await response.json();
+
+        // 取得したURLでリダイレクト
+        if (data && data.oauth_url) {
+            window.location.href = data.oauth_url; // レスポンスのURLにリダイレクト
+        } else {
+            console.error('URL not found in response');
+        }
+
+    } catch (error) {
+        // エラー時にエラーメッセージを表示
+        alert('リダイレクト失敗: ' + error.message || 'サーバーエラー');
+    }
 }
+
 
 //外部リンクから取得したcodeでログインする
 async function loginWith42Oauth() {
@@ -119,28 +126,45 @@ async function loginWith42Oauth() {
 
     if (code) {
         try {
-            const response = await fetch(apiBase + 'login42/', {
+            const response = await fetch(apiBase + 'oauth/login42/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ code })  // codeをJSONで送信
             });
 
-            const data = await response.json();  // awaitでレスポンスを取得
-            localStorage.setItem('access_token', data.jwt);
-            localStorage.setItem('username', username);
-            document.cookie = `jwt=${data.jwt}; path=/; max-age=86400; SameSite=Lax`;
+            // レスポンスが正常かどうかを確認
+            if (!response.ok) {
+                throw new Error(`Failed to login: ${response.statusText}`);
+            }
+
+            const data = await response.json();  // JSON形式でレスポンスを取得
+
+            // JWTの保存（セキュリティ考慮）
+            if (data.jwt) {
+                localStorage.setItem('access_token', data.jwt);
+                document.cookie = `jwt=${data.jwt}; path=/; max-age=86400; Secure; SameSite=Lax`; // セキュアなクッキーに保存
+            } else {
+                throw new Error('JWT not found in the response');
+            }
+
+            // ユーザープロフィールを取得し、ナビゲーションを有効化
             await fetchUserProfile();
             enableNavigation(true);
-            navigateTo('dashboard');
 
+            // ダッシュボードに遷移
+            navigateTo('dashboard');
         } catch (error) {
-            console.error('Error: signup or login error', error);
+            // エラーハンドリング
+            console.error('Error during login or signup:', error.message);
+            alert('ログインに失敗しました。再度お試しください。');
         }
     } else {
         console.error('No code found in the URL');
+        alert('認証に必要なcodeがURLに含まれていません。');
     }
 }
+
 
 
 // サインアップ処理
