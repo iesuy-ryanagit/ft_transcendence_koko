@@ -88,7 +88,9 @@ async function loginWith2FA() {
     }
 }
 
-document.getElementById('oauthButton').addEventListener('click', function() {
+//外部リンクへ飛ぶ
+async function Goto42Oauth() {
+    alert('リダイレクト失敗: ' + (data.detail || 'サーバーエラー'));
     // FetchでURLを取得
     fetch(apiBase + 'oauth/url42/')
         .then(response => {
@@ -106,9 +108,39 @@ document.getElementById('oauthButton').addEventListener('click', function() {
             }
         })
         .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
+            alert('リダイレクト失敗: ' + (data.detail || 'サーバーエラー'));
         });
-});
+}
+
+//外部リンクから取得したcodeでログインする
+async function loginWith42Oauth() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');  // 'code'を変数に格納
+
+    if (code) {
+        try {
+            const response = await fetch(apiBase + 'login42/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ code })  // codeをJSONで送信
+            });
+
+            const data = await response.json();  // awaitでレスポンスを取得
+            localStorage.setItem('access_token', data.jwt);
+            localStorage.setItem('username', username);
+            document.cookie = `jwt=${data.jwt}; path=/; max-age=86400; SameSite=Lax`;
+            await fetchUserProfile();
+            enableNavigation(true);
+            navigateTo('dashboard');
+
+        } catch (error) {
+            console.error('Error: signup or login error', error);
+        }
+    } else {
+        console.error('No code found in the URL');
+    }
+}
 
 
 // サインアップ処理
@@ -129,6 +161,9 @@ async function signUp() {
         alert('登録失敗: ' + data.message);
     }
 }
+
+
+
 
 // セットアップ2FA処理
 async function setUpTfa() {
@@ -178,7 +213,7 @@ function navigateTo(page, addHistory = true) {
 	} else if (page = 'loginSelection'){
 		document.getElementById('loginSelection').classList.remove('d-none');
 	} else if (page == 'oauth42'){
-
+		document.getElementById('oauth42').classList.remove('d-none');  
     }
 
     // ブラウザ履歴を追加
