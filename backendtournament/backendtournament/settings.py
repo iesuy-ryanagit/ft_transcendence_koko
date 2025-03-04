@@ -130,3 +130,42 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#cookie
+SECURE_SSL_REDIRECT = False  # ローカル開発環境ではHTTPSリダイレクトは不要
+CSRF_COOKIE_SECURE = False  # HTTPS接続がない場合はCSRFクッキーをセキュアにしない
+SESSION_COOKIE_SECURE = False  # セッションIDのクッキーをセキュアにしない
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",  # フロントエンドのURL
+    "http://127.0.0.1:3000",  # 127.0.0.1 を許可
+    "http://localhost:80",  # フロントエンドのURL
+    "http://127.0.0.1:80",  # 127.0.0.1 を許可
+    "http://localhost",
+]
+
+# settings.pyに追加
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # フロントエンドのURL
+    "http://127.0.0.1:3000",  # 127.0.0.1 を許可
+    "http://localhost:80",  # フロントエンドのURL
+    "http://127.0.0.1:80",  # 127.0.0.1 を許可
+    "http://localhost",
+]
+
+ALLOWED_HOSTS = [
+    'localhost', 
+    '127.0.0.1',
+]
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False
+
+# settings.py
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SAMESITE = 'None'  # 開発環境用
+CSRF_COOKIE_SAMESITE = 'None'  # 開発環境用
+# クッキー関連の設定（特に、クロスオリジンリクエストを扱う場合に重要）
+
+CORS_PREFLIGHT_MAX_AGE = 60 * 30
