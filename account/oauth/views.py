@@ -19,7 +19,7 @@ class OauthUrlView(views.APIView):
         # OAuth URLをレスポンスで返す
         return Response({
             "status": "success",
-            "42oauth_url": auth_url,
+            "oauth_url": auth_url,
         }, status=status.HTTP_200_OK)
 
 class OauthLoginView(views.APIView):
