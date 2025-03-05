@@ -58,8 +58,20 @@ class OTPLoginSerializer(serializers.Serializer):
         print("success authenticate")
         return data
 
+class UserSettingsSerializer(serializers.ModelSerializer):
+    ball_speed = serializers.DecimalField(max_digits=5, decimal_places=2)
+    timer = serializers.IntegerField()
 
+    class Meta:
+        model = CustomUser
+        fields = ['ball_speed', 'timer']
 
+    def validate_ball_speed(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Ball speed must be a positive value.")
+        return value
 
-
-
+    def validate_timer(self, value):
+        if value < 1 or value > 3600:
+            raise serializers.ValidationError("Timer must be between 1 and 3600 seconds.")
+        return value
