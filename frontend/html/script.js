@@ -1,4 +1,5 @@
 const apiBase = 'http://localhost:8000/api/';
+const TorunemtBase = 'http://localhost:8002/api/';
 
 $(window).on("popstate", function (event) {
     // 現在のURLのハッシュ部分を取得して、適切なページに遷移
@@ -249,7 +250,7 @@ function navigateTo(page, addHistory = true) {
 async function fetchTournaments() {
     const token = localStorage.getItem('access_token');
 
-    const response = await fetch(apiBase + 'tournaments/', {
+    const response = await fetch(TorunemtBase + 'tournament/list/', {
         method: 'GET',
         headers: { 'Authorization': 'Bearer ' + token }
     });
@@ -274,18 +275,21 @@ async function fetchTournaments() {
 
 async function createTournament() {
     const name = document.getElementById('tournament-name').value;
+	const size = document.getElementById('tournament-size').value;
     const token = localStorage.getItem('access_token');
 
-    const response = await fetch(apiBase + 'tournaments/', {
+    const response = await fetch(TorunemtBase + 'tournament/create/', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
         },
-        body: JSON.stringify({ name })
+        body: JSON.stringify({name, size})
+
     });
 
     const data = await response.json();
+	console.log(data.name);
 
     if (response.ok) {
         navigateTo('dashboard');
