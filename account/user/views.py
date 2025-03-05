@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from rest_framework import status, views
 from rest_framework.response import Response
 from .models import CustomUser
-from .serializers import CustomUserSerializer, SignupSerializer, LoginSerializer, OTPLoginSerializer
+from .serializers import CustomUserSerializer, SignupSerializer, LoginSerializer, OTPLoginSerializer, UserSettingsSerializer
 from rest_framework.permissions import IsAuthenticated
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from .jwts import generate_jwt,JWTAuthentication
@@ -136,3 +136,19 @@ class ProfileView(views.APIView):
     def get(self, request, *args, **kwargs):
         # The `request.user` should already be authenticated if IsAuthenticated is used.
         return Response(CustomUserSerializer(request.user).data)
+
+
+class UpdateUserSettingsView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, *args, **kwargs):
+        user = request.user
+        serializer = UserSettingsSerializer(user, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            # バリデーションを通過した場合に保存
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
