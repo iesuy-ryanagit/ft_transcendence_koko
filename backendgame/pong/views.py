@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework import status
 import requests, time
 from django.conf import settings
-from game.models import GameSetting
 from django.contrib.auth import get_user_model
 import random
 
@@ -42,9 +41,13 @@ def match_start(request):
     # POSTリクエストの場合はボディから、GETリクエストの場合はクエリパラメータから取得
     if request.method == 'POST':
         match_id = request.data.get('match_id', None)
+        ball_speed_str = request.data.get('ball_speed', None)
+        game_timer = request.data.get('game_timer', None)
     else:  # GET
         match_id = request.query_params.get('match_id', None)
-    
+        ball_speed_str = request.query_params.get('ball_speed', None)
+        game_timer = request.query_params.get('game_timer', None)
+    ball_speed = float(game_setting.ball_speed) * DEFAULT_BALL_SPEED
     # マッチIDがない場合は、デモ用のIDを生成
     if not match_id:
         match_id = 'demo_game'
