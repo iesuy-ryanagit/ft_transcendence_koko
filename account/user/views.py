@@ -138,7 +138,7 @@ class ProfileView(views.APIView):
         return Response(CustomUserSerializer(request.user).data)
 
 
-class UpdateUserSettingsView(APIView):
+class UpdateUserSettingsView(views.APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
