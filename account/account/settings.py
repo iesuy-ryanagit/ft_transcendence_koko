@@ -124,6 +124,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:80",  # フロントエンドのURL
     "http://127.0.0.1:80",  # 127.0.0.1 を許可
     "http://localhost",
+    "https://localhost",
 ]
 
 # settings.pyに追加
@@ -133,6 +134,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:80",  # フロントエンドのURL
     "http://127.0.0.1:80",  # 127.0.0.1 を許可
     "http://localhost",
+    "https://localhost",
 ]
 
 ALLOWED_HOSTS = [
