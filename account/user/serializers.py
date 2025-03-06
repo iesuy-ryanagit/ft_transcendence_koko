@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'otp_enabled']
+        fields = ['id', 'username', 'otp_enabled','ball_speed', 'timer']
 
 class SignupSerializer(serializers.ModelSerializer):
     class Meta:
