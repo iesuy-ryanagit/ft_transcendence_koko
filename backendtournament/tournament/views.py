@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
+# from .jwts import generate_jwt,JWTAuthentication
 
 from .models import Tournament
 from .serializers import (
@@ -21,7 +22,12 @@ from .services import create_tournament_schedule, process_match_result, start_to
 
 # Create your views here.
 class CreateTournamenView(APIView):
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [
+    #     JWTAuthentication,
+    # ]
+    # permission_classes = [
+    #     IsAuthenticated,
+    # ]
 
     def post(self, request):
         serializer = TournamentSerializer(data=request.data, context={'request': request})
@@ -109,7 +115,7 @@ class TournamentDetailView(generics.RetrieveAPIView):
     serializer_class = TournamentDetailSerializer
 
 class TournamentFinishView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = TournamentFinishSerializer(data=request.data)
@@ -127,7 +133,7 @@ class TournamentFinishView(APIView):
     
 
 class TournamentStartView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = TournamentStartSerializer(data=request.data)

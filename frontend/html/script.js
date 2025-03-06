@@ -1,5 +1,6 @@
 const apiBase = 'http://localhost:8000/api/';
 const TorunemtBase = 'http://localhost:8002/api/';
+const GameBase = 'http://localhost:8001/api/';
 
 $(window).on("popstate", function (event) {
     // 現在のURLのハッシュ部分を取得して、適切なページに遷移
@@ -228,18 +229,19 @@ function navigateTo(page, addHistory = true) {
         document.getElementById('signup').classList.remove('d-none');
     } else if (page === 'dashboard') {
         document.getElementById('dashboard').classList.remove('d-none');
-        fetchTournaments();
     } else if (page === 'create-tournament') {
         document.getElementById('create-tournament').classList.remove('d-none');
     } else if (page === 'match-result') {
         document.getElementById('match-result').classList.remove('d-none');
     } else if (page == 'TFAregister'){
 		document.getElementById('TFAregister').classList.remove('d-none');
-	} else if (page = 'loginSelection'){
+	} else if (page == 'loginSelection'){
 		document.getElementById('loginSelection').classList.remove('d-none');
 	} else if (page == 'oauth42'){
 		document.getElementById('oauth42').classList.remove('d-none');  
-    }
+    } else if (page == 'game-settings'){
+		document.getElementById('game-settings').classList.remove('d-none');
+	}
 
     // ブラウザ履歴を追加
     if (addHistory) {
@@ -275,7 +277,7 @@ async function fetchTournaments() {
 
 async function createTournament() {
     const name = document.getElementById('tournament-name').value;
-	const size = document.getElementById('tournament-size').value;
+	const max_participants = document.getElementById('tournament-size').value;
     const token = localStorage.getItem('access_token');
 
     const response = await fetch(TorunemtBase + 'tournament/create/', {
@@ -284,7 +286,7 @@ async function createTournament() {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
         },
-        body: JSON.stringify({name, size})
+        body: JSON.stringify({name, max_participants})
 
     });
 
@@ -389,6 +391,10 @@ function showMatchResult(addHistory = true) {
     navigateTo('match-result', addHistory);
 }
 
+function showMatchResult(addHistory = true) {
+    navigateTo('game-settings', addHistory);
+}
+
 async function showTFARegister(addHistory = true) {
     await fetchTFAQRCode(); // QRコード取得を待つ
     navigateTo('TFAregister', addHistory);
@@ -442,12 +448,27 @@ function logout() {
 // ページ読み込み時の処理（URLの `#` を元に復元）
 document.addEventListener('DOMContentLoaded', () => {
     const backButton = document.querySelector("#TFAregister .btn-secondary");
-
+    
     if (backButton) {
         backButton.addEventListener("click", async function () {
             await sendTFAExitRequest();
             navigateTo("dashboard");
         });
+    }
+
+    // スライダーの値を表示に反映
+    const ballSpeedSlider = document.getElementById('ball-speed');
+    const ballSpeedValue = document.getElementById('ball-speed-value');
+    
+    if (ballSpeedSlider && ballSpeedValue) {
+        ballSpeedSlider.addEventListener('input', function () {
+            ballSpeedValue.textContent = this.value;
+        });
+    }
+
+    // ページ読み込み時にゲーム設定をロード
+    if (document.getElementById('game-settings')) {
+        loadGameSettings();
     }
 
     const token = localStorage.getItem('access_token');
@@ -457,3 +478,78 @@ document.addEventListener('DOMContentLoaded', () => {
     const page = location.hash.replace('#', '') || 'loginSelection';
     navigateTo(token ? page : 'loginSelection', false);
 });
+
+
+async function saveGameSettings() {
+    const ball_speed = document.getElementById('ball-speed').value;
+    const ball_multiplier_enabled = document.getElementById('increase-balls').checked;
+    const token = localStorage.getItem('access_token'); // 認証トークン
+
+    if (!token) {
+        alert('認証トークンがありません。ログインし直してください。');
+        return;
+    }
+
+    console.log('Sending request to:', GameBase + 'game/setting/');
+    console.log('Settings:', settings);
+    
+    try {
+        const response = await fetch(GameBase + 'game/setting/', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(ball_speed, ball_multiplier_enabled)
+        });
+
+        console.log('Status:', response.status);
+        
+        const text = await response.text();
+        console.log('Response Text:', text);
+
+        try {
+            const data = JSON.parse(text); // JSONパース
+            if (response.ok) {
+                alert('設定を保存しました！');
+            } else {
+                alert('設定の保存に失敗: ' + (data.message || 'サーバーエラー'));
+            }
+        } catch (jsonError) {
+            console.error('JSONパースエラー:', jsonError);
+            alert('サーバーから不正なレスポンスが返されました。');
+        }
+
+    } catch (error) {
+        console.error('設定保存中にエラー:', error);
+        alert('通信エラーが発生しました');
+    }
+}
+
+
+async function loadGameSettings() {
+    const token = localStorage.getItem('access_token'); // 認証トークン
+
+    try {
+        const response = await fetch(GameBase + 'game/setting/', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('設定の取得に失敗');
+        }
+
+        const data = await response.json();
+
+        // 取得したデータをUIに反映
+        document.getElementById('ball-speed').value = data.ballSpeed;
+        document.getElementById('ball-speed-value').textContent = data.ballSpeed;
+        document.getElementById('increase-balls').checked = data.increaseBalls;
+    } catch (error) {
+        console.error('設定の取得エラー:', error);
+        alert('ゲーム設定の取得に失敗しました');
+    }
+}
