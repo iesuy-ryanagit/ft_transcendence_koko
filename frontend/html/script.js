@@ -1,6 +1,7 @@
 const apiBase = 'http://localhost:8000/api/';
-const TorunemtBase = 'http://localhost:8002/api/';
+const TournamentBase = 'http://localhost:8002/api/';
 const GameBase = 'http://localhost:8001/api/';
+let selectedTournamentId = null; 
 
 $(window).on("popstate", function (event) {
     // 現在のURLのハッシュ部分を取得して、適切なページに遷移
@@ -241,6 +242,11 @@ function navigateTo(page, addHistory = true) {
 		document.getElementById('oauth42').classList.remove('d-none');  
     } else if (page == 'game-settings'){
 		document.getElementById('game-settings').classList.remove('d-none');
+	} else if (page == 'tournament-management'){
+		document.getElementById('tournament-management').classList.remove('d-none');
+	} else if (page == 'tournament-list'){
+		loadTournamentList();
+		document.getElementById('tournament-list').classList.remove('d-none');
 	}
 
     // ブラウザ履歴を追加
@@ -252,7 +258,7 @@ function navigateTo(page, addHistory = true) {
 async function fetchTournaments() {
     const token = localStorage.getItem('access_token');
 
-    const response = await fetch(TorunemtBase + 'tournament/list/', {
+    const response = await fetch(TournamentBase + 'tournament/list/', {
         method: 'GET',
         headers: { 'Authorization': 'Bearer ' + token }
     });
@@ -280,7 +286,7 @@ async function createTournament() {
 	const max_participants = document.getElementById('tournament-size').value;
     const token = localStorage.getItem('access_token');
 
-    const response = await fetch(TorunemtBase + 'tournament/create/', {
+    const response = await fetch(TournamentBase + 'tournament/create/', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
@@ -391,8 +397,16 @@ function showMatchResult(addHistory = true) {
     navigateTo('match-result', addHistory);
 }
 
-function showMatchResult(addHistory = true) {
+function showGameSettings(addHistory = true) {
     navigateTo('game-settings', addHistory);
+}
+
+function showTournamentManegement(addHistory = true) {
+    navigateTo('tournament-management', addHistory);
+}
+
+function showTournamentList(addHistory = true) {
+    navigateTo('tournament-list', addHistory);
 }
 
 async function showTFARegister(addHistory = true) {
@@ -482,7 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function saveGameSettings() {
     const ball_speed = document.getElementById('ball-speed').value;
-    const ball_multiplier_enabled = document.getElementById('increase-balls').checked;
+    const timer = document.getElementById('match-duration').value;
     const token = localStorage.getItem('access_token'); // 認証トークン
 
     if (!token) {
@@ -490,17 +504,17 @@ async function saveGameSettings() {
         return;
     }
 
-    console.log('Sending request to:', GameBase + 'game/setting/');
-    console.log('Settings:', settings);
+    console.log('Sending request to:', apiBase + 'setup-game/');
     
     try {
-        const response = await fetch(GameBase + 'game/setting/', {
-            method: 'PATCH',
+        const response = await fetch(apiBase + 'setup-game/', {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(ball_speed, ball_multiplier_enabled)
+            credentials: 'include',  // 必要なら追加
+            body: JSON.stringify({ball_speed, timer})
         });
 
         console.log('Status:', response.status);
@@ -531,7 +545,7 @@ async function loadGameSettings() {
     const token = localStorage.getItem('access_token'); // 認証トークン
 
     try {
-        const response = await fetch(GameBase + 'game/setting/', {
+        const response = await fetch(apiBase + 'setup-game/', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -552,4 +566,92 @@ async function loadGameSettings() {
         console.error('設定の取得エラー:', error);
         alert('ゲーム設定の取得に失敗しました');
     }
+}
+
+function loadTournamentList() {
+    const container = document.getElementById("tournament-list-container");
+    container.innerHTML = "<p>読み込み中...</p>";
+
+    fetch(TournamentBase + 'tournament/list')
+        .then(response => response.json())
+        .then(data => {
+			console.log(data);
+            if (data.length === 0) {
+                container.innerHTML = "<p>トーナメントがありません。</p>";
+                return;
+            }
+            container.innerHTML = data.map(tournament => `
+                <div class="card my-2">
+                    <div class="card-body">
+                        <h5 class="card-title">${tournament.name}</h5>
+                        <p class="card-text">最大参加可能人数: ${tournament.max_participants}</p>
+						<button class="btn btn-success" onclick="registerPlayer('${tournament.id}')">プレイヤー登録</button>
+						<button class="btn btn-warning" onclick="startTournament('${tournament.id}')">試合開始</button>
+                        <button class="btn btn-primary" onclick="viewTournament('${tournament.id}')">詳細</button>
+                    </div>
+                </div>
+            `).join("");
+        })
+        .catch(error => {
+            console.error("トーナメント一覧の取得に失敗:", error);
+            container.innerHTML = "<p>データを取得できませんでした。</p>";
+        });
+}
+
+// モーダルを開く
+function registerPlayer(tournamentId) {
+    selectedTournamentId = tournamentId;
+	console.log(selectedTournamentId);
+    document.getElementById("playerRegisterModal").style.display = "block";
+}
+
+// モーダルを閉じる
+function closeModal() {
+    document.getElementById("playerRegisterModal").style.display = "none";
+}
+
+function submitPlayerRegistration() {
+    const alias = document.getElementById("playerNameInput").value;
+    if (!alias) {
+        alert("プレイヤー名を入力してください");
+        return;
+    }
+
+    if (!selectedTournamentId) {
+        alert("トーナメントが選択されていません。");
+        return;
+    }
+
+    fetch(TournamentBase + `tournament/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tournament_id: selectedTournamentId, alias })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert("プレイヤーが登録されました！");
+        closeModal();  // 登録後にモーダルを閉じる
+    })
+    .catch(error => {
+        console.error("登録エラー:", error);
+        alert("登録に失敗しました");
+    });
+}
+
+// 試合開始APIを呼び出す関数
+function startTournament(tournamentId) {
+    fetch(TorunemtBase + `tournament/${tournamentId}/start`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert("トーナメント開始: " + data.message);
+    })
+    .catch(error => {
+        console.error("トーナメント開始失敗:", error);
+        alert("トーナメント開始に失敗しました。");
+    });
 }
