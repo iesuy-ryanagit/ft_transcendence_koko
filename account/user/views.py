@@ -142,6 +142,17 @@ class UpdateUserSettingsView(views.APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def get(self, request, *args, **kwargs):
+        try:
+            user= request.user
+            ball_speed = user.ball_speed
+            timer = user.timer
+            response = Response({'ball_speed': ball_speed, 'timer': timer}, status=status.HTTP_200_OK)
+            return response
+        except AttributeError:
+            return Response({'error': 'User settings not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+
     def put(self, request, *args, **kwargs):
         user = request.user
         serializer = UserSettingsSerializer(user, data=request.data, partial=True)
