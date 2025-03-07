@@ -73,18 +73,62 @@
             <button class="btn btn-secondary w-100 mt-2" onclick="navigateTo('loginSelection')">ログイン選択画面へ</button>
         </div>
 
-
         <!-- ダッシュボード -->
-        <div id="dashboard" class="page d-none">
-            <h2>トーナメント一覧</h2>
-            <button class="btn btn-success" onclick="navigateTo('create-tournament')">新規トーナメント作成</button>
-            <div class="list-group mt-3" id="tournament-list"></div>
-        </div>
+		<div id="dashboard" class="page d-none">
+			<h2>ダッシュボード</h2>
+			<button class="btn btn-primary" onclick="navigateTo('tournament-management')">トーナメント管理</button>
+			<button class="btn btn-warning" onclick="navigateTo('game-settings')">ゲーム設定を変更</button>
+		</div>
+
+		<!-- トーナメント管理画面 -->
+		<div id="tournament-management" class="page d-none">
+			<h2>トーナメント管理</h2>
+			<button class="btn btn-primary w-100 my-2" onclick="navigateTo('tournament-list')">トーナメント一覧</button>
+			<button class="btn btn-success w-100 my-2" onclick="navigateTo('create-tournament')">新規トーナメント作成</button>
+			<button class="btn btn-secondary w-100 my-2" onclick="navigateTo('dashboard')">戻る</button>
+		</div>
+
+		<!-- トーナメント一覧画面 -->
+		<div id="tournament-list" class="page d-none">
+			<h2>トーナメント一覧</h2>
+			<div id="tournament-list-container">
+				<p>読み込み中...</p>
+			</div>
+			<button class="btn btn-secondary w-100 my-2" onclick="navigateTo('tournament-management')">戻る</button>
+		</div>
+
+		<!-- モーダル -->
+		<div id="playerRegisterModal" class="modal">
+			<div class="modal-content">
+				<span class="close" onclick="closeModal()">&times;</span>
+				<h2>プレイヤー登録</h2>
+				<input type="text" id="playerNameInput" placeholder="プレイヤー名を入力">
+				<button class="btn btn-primary" onclick="submitPlayerRegistration()">登録</button>
+			</div>
+		</div>
+
+		<!--ゲーム設定画面-->
+		<div id="game-settings" class="page d-none">
+			<h2>ゲーム設定</h2>
+		
+			<label for="ball-speed" class="form-label">ボールのスピード:</label>
+			<input type="range" id="ball-speed" class="form-range" min="1" max="10" step="1">
+			<span id="ball-speed-value">5</span>
+		
+			<div class="my-3">
+				<label for="match-duration" class="form-label">試合時間（秒）:</label>
+				<input type="number" id="match-duration" class="form-control" min="10" max="300" step="10" value="60">
+			</div>
+		
+			<button class="btn btn-primary" onclick="saveGameSettings()">保存</button>
+			<button class="btn btn-secondary" onclick="navigateTo('dashboard')">戻る</button>
+		</div>
 
         <!-- トーナメント作成画面 -->
         <div id="create-tournament" class="page d-none">
             <h2>新規トーナメント作成</h2>
             <input type="text" class="form-control my-2" id="tournament-name" placeholder="トーナメント名">
+			<input type="number" class="form-control my-2" id="tournament-size" placeholder="参加人数" min="2">
             <button class="btn btn-primary" onclick="createTournament()">作成</button>
             <button class="btn btn-secondary" onclick="navigateTo('dashboard')">戻る</button>
         </div>
