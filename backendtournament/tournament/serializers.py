@@ -52,10 +52,7 @@ class TournamentParticipantSerializer(serializers.ModelSerializer):
         
         if TournamentParticipant.objects.filter(tournament=tournament, alias=alias).exists():
             raise serializers.ValidationError("Alias already exists")
-        
-        # request = self.context.get('request')
-        # if request and TournamentParticipant.objects.filter(tournament=tournament, user=request.user).exists():
-        #     raise serializers.ValidationError("You are already in this tournament")
+    
         
         data['tournament'] = tournament
         return data
@@ -64,11 +61,9 @@ class TournamentParticipantSerializer(serializers.ModelSerializer):
         tournament = validated_data.pop('tournament')
         alias = validated_data.pop('alias')
         request = self.context.get('request')
-        user = request.user if request else None
 
         participant = TournamentParticipant.objects.create(
             tournament=tournament,
-            user=user,
             alias=alias
         )
         return participant

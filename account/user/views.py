@@ -142,7 +142,6 @@ class UpdateUserSettingsView(views.APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-<<<<<<< HEAD
     def get(self, request, *args, **kwargs):
         try:
             user= request.user
@@ -154,8 +153,6 @@ class UpdateUserSettingsView(views.APIView):
             return Response({'error': 'User settings not found'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-=======
->>>>>>> game_fronted
     def put(self, request, *args, **kwargs):
         user = request.user
         serializer = UserSettingsSerializer(user, data=request.data, partial=True)
@@ -165,8 +162,4 @@ class UpdateUserSettingsView(views.APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-<<<<<<< HEAD
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-=======
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
->>>>>>> game_fronted
