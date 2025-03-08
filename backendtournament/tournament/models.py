@@ -1,8 +1,5 @@
 import uuid
 from django.db import models
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
 
 # Create your models here.
 class Tournament(models.Model):
@@ -34,14 +31,14 @@ class TournamentParticipant(models.Model):
 	# the following id filed are implicitly created by django	
 	# id = models.AutoFiled(primary_key=True)
 	tournament = models.ForeignKey(Tournament, related_name="tournament_participants", on_delete=models.CASCADE)
-	user = models.ForeignKey(User, related_name="tournament_entries", on_delete=models.CASCADE)
+	# user = models.ForeignKey(User, related_name="tournament_entries", on_delete=models.CASCADE)
 	alias = models.CharField(max_length=100)
 
 	class Meta:
 		unique_together = ('tournament', 'alias')
 
 	def __str__(self):
-		return f"{self.alias} ({self.user.username}) in {self.tournament.name}"
+		return f"{self.alias}in {self.tournament.name}"
 
 class Match(models.Model):
 	STATUS_CHOICES = [
@@ -73,6 +70,6 @@ class Match(models.Model):
 class Score(models.Model):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='scores')
-	player = models.ForeignKey(User, on_delete=models.CASCADE)
+	# player = models.ForeignKey(User, on_delete=models.CASCADE)
 	score = models.IntegerField()
 	timestamp = models.DateTimeField(auto_now_add=True)
