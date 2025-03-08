@@ -582,30 +582,56 @@
 
 	async function loadGameSettings() {
 		const token = localStorage.getItem('access_token'); // 認証トークン
-
+	
 		try {
 			const response = await fetch(apiBase + 'setup-game/', {
 				method: 'GET',
 				headers: {
+					'Content-Type': 'application/json',
 					'Authorization': `Bearer ${token}`
-				}
+				},
+				credentials: 'include'
 			});
-
+	
+			console.log("API Response Status:", response.status); // ステータスコードを確認
+	
 			if (!response.ok) {
-				throw new Error('設定の取得に失敗');
+				throw new Error(`設定の取得に失敗: ${response.statusText}`);
 			}
-
+	
 			const data = await response.json();
-
+			console.log("取得したデータ:", data); // 取得したデータを確認
+	
+			// `ballSpeed` や `timer` が存在しない場合のエラーチェック
+			if (!data || data.ball_speed === undefined || data.timer === undefined) {
+				console.log(data.ball_speed)
+				console.log(data.timer)
+				throw new Error("APIレスポンスに必要なデータがありません");
+			}
+	
+			// HTML要素の取得
+			const ballSpeedInput = document.getElementById('ball-speed');
+			const ballSpeedValue = document.getElementById('ball-speed-value');
+			const matchDuration = document.getElementById('match-duration');
+	
+			if (!ballSpeedInput || !ballSpeedValue || !matchDuration) {
+				throw new Error("HTML要素が見つかりません");
+			}
+	
 			// 取得したデータをUIに反映
-			document.getElementById('ball-speed').value = data.ballSpeed;
-			document.getElementById('ball-speed-value').textContent = data.ballSpeed;
-			document.getElementById('increase-balls').checked = data.increaseBalls;
+			ballSpeedInput.value = data.ballSpeed;
+			ballSpeedValue.textContent = data.ballSpeed;
+			matchDuration.value = data.timer;
+	
+			console.log("ゲーム設定を更新しました");
+			return data; // 取得したデータを返す
 		} catch (error) {
 			console.error('設定の取得エラー:', error);
 			alert('ゲーム設定の取得に失敗しました');
+			return null;
 		}
 	}
+	
 
 	function loadTournamentList() {
 		const container = document.getElementById("tournament-list-container");
@@ -720,9 +746,28 @@ document.addEventListener("keyup", (event) => {
 // ゲーム開始処理
 async function startTournament(tournamentId) {
     try {
-        const response = await fetch(`${GameBase}pong/start/?match_id=${tournamentId}`, {
+        // ゲーム設定を取得
+        const gameSettings = await loadGameSettings();
+        if (!gameSettings) {
+            throw new Error("ゲーム設定の取得に失敗しました。");
+        }
+
+		const settings = {
+			ball_speed: gameSettings.ball_speed,
+			timer: gameSettings.timer
+		}
+		console.log(settings)
+        // APIリクエスト送信
+        const response = await fetch(GameBase + 'pong/start/', {
             method: "POST",
-            headers: { "Content-Type": "application/json" }
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			credentials: 'include',
+            body: JSON.stringify({
+                match_id: tournamentId,
+				settings
+            })
         });
 
         if (!response.ok) {

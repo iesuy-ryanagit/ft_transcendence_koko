@@ -36,6 +36,7 @@ def notify_tournament_match_end(match_id, winner, final_score):
 
 @api_view(['POST', 'GET'])
 def match_start(request):
+
     """ゲームの初期状態を設定して返す"""
     # トーナメントシステムからのマッチIDを取得
     # POSTリクエストの場合はボディから、GETリクエストの場合はクエリパラメータから取得
@@ -47,26 +48,27 @@ def match_start(request):
         match_id = request.query_params.get('match_id', None)
         ball_speed_str = request.query_params.get('ball_speed', None)
         game_timer = request.query_params.get('game_timer', None)
-    ball_speed = float(game_setting.ball_speed) * DEFAULT_BALL_SPEED
+
+	ball_speed = DEFAULT_BALL_SPEED
     # マッチIDがない場合は、デモ用のIDを生成
-    if not match_id:
-        match_id = 'demo_game'
+    # if not match_id:
+    #     match_id = 'demo_game'
     
     # ユーザーのゲーム設定を取得（認証されている場合）
-    ball_speed = DEFAULT_BALL_SPEED
-    game_timer = None
+    # ball_speed = DEFAULT_BALL_SPEED
+    # game_timer = None
     
-    if request.user.is_authenticated:
-        try:
-            game_setting = GameSetting.objects.get(user=request.user)
-            # ボールスピードを設定から取得（float型に変換）
-            ball_speed = float(game_setting.ball_speed) * DEFAULT_BALL_SPEED
-            # タイマーを設定から取得
-            if game_setting.timer > 0:
-                game_timer = game_setting.timer
-        except GameSetting.DoesNotExist:
-            # 設定がない場合はデフォルト値を使用
-            pass
+    # if request.user.is_authenticated:
+    #     try:
+    #         game_setting = GameSetting.objects.get(user=request.user)
+    #         # ボールスピードを設定から取得（float型に変換）
+    #         ball_speed = float(game_setting.ball_speed) * DEFAULT_BALL_SPEED
+    #         # タイマーを設定から取得
+    #         if game_setting.timer > 0:
+    #             game_timer = game_setting.timer
+    #     except GameSetting.DoesNotExist:
+    #         # 設定がない場合はデフォルト値を使用
+    #         pass
     
     game_state = {
         'ball': {
@@ -103,15 +105,14 @@ def match_start(request):
     }
     
     # タイマーが設定されている場合は追加
-    if game_timer:
-        game_state['timer'] = {
-            'duration': game_timer,  # 秒単位
-            'start_time': int(time.time())  # 現在のUNIXタイムスタンプ
-        }
+    # if game_timer:
+    #     game_state['timer'] = {
+    #         'duration': game_timer,  # 秒単位
+    #         'start_time': int(time.time())  # 現在のUNIXタイムスタンプ
+    #     }
     
     # ゲーム状態をマッチIDに紐づけて保存
     game_states[match_id] = game_state
-    
     return JsonResponse({
         'match_id': match_id,
         'state': game_state
