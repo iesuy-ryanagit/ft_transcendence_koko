@@ -19,11 +19,20 @@
 	let isFetching = false;
 
 	$(window).on("popstate", function (event) {
-		// 現在のURLのハッシュ部分を取得して、適切なページに遷移
-		const page = location.hash.replace('#', '') || 'login-base';
+		let page = location.hash.replace('#', '');
+		if (!page || !document.getElementById(page)) {
+			page = 'loginSelection'; // 存在しないページなら loginSelection にする
+		}
+	
+		if (page === 'tournament-list') {
+			loadTournamentList();
+		}
 		console.log('Popstate triggered, navigating to:', page);
-		navigateTo(page, false); // ここでページ遷移を呼び出し
+	
+		navigateTo(page, false);
 	});
+	
+	
 
 
 	async function login() {
@@ -225,52 +234,43 @@
 	}
 
 	function enableNavigation(enable) {
-		document.getElementById('nav-dashboard').classList.toggle('disabled', !enable);
-		document.getElementById('nav-profile').classList.toggle('disabled', !enable);
+		document.getElementById('nav-dashboard').classList.toggle('disabled', !enable);;
 		document.getElementById('nav-logout').classList.toggle('disabled', !enable);
 		document.getElementById('nav-tfasign').classList.toggle('disabled', !enable);
 	}
 
 	// 画面遷移関数
 	function navigateTo(page, addHistory = true) {
-		// すべての画面を非表示にする
-		document.querySelectorAll('.page').forEach(page => page.classList.add('d-none'));
-		// 表示するページを決定
-		if (page === 'tfalogin') {
-			document.getElementById('tfalogin').classList.remove('d-none');
+		console.log("Navigating to:", page);
+	
+		if (!document.getElementById(page)) {
+			console.error(`Page not found: ${page}`);
+			return;
 		}
-		else if (page === 'login') {
-			document.getElementById('login').classList.remove('d-none');
-		} else if (page === 'signup') {
-			document.getElementById('signup').classList.remove('d-none');
-		} else if (page === 'dashboard') {
-			document.getElementById('dashboard').classList.remove('d-none');
-		} else if (page === 'create-tournament') {
-			document.getElementById('create-tournament').classList.remove('d-none');
-		} else if (page === 'match-result') {
-			document.getElementById('match-result').classList.remove('d-none');
-		} else if (page == 'TFAregister'){
-			document.getElementById('TFAregister').classList.remove('d-none');
-		} else if (page == 'loginSelection'){
-			document.getElementById('loginSelection').classList.remove('d-none');
-		} else if (page == 'oauth42'){
-			document.getElementById('oauth42').classList.remove('d-none');  
-		} else if (page == 'game-settings'){
-			document.getElementById('game-settings').classList.remove('d-none');
-		} else if (page == 'tournament-management'){
-			document.getElementById('tournament-management').classList.remove('d-none');
-		} else if (page == 'tournament-list'){
+	
+		if (location.hash === `#${page}`) {
+			console.log("Same page, skipping pushState");
+			return;
+		}
+	
+		document.querySelectorAll('.page').forEach(p => p.classList.add('d-none'));
+	
+		document.getElementById(page).classList.remove('d-none');
+		console.log(`Showing page: ${page}`);
+	
+		// 🔹 ここでトーナメントリストをロード
+		if (page === 'tournament-list') {
+			console.log("Loading tournament list...");
 			loadTournamentList();
-			document.getElementById('tournament-list').classList.remove('d-none');
-		} else if (page == 'game-screen'){
-			document.getElementById('game-screen').classList.remove('d-none');
 		}
-
-		// ブラウザ履歴を追加
+	
 		if (addHistory) {
 			history.pushState({ page }, '', `#${page}`);
 		}
 	}
+	
+	
+	
 
 	async function fetchTournaments() {
 		const token = localStorage.getItem('access_token');
@@ -314,7 +314,6 @@
 		});
 
 		const data = await response.json();
-		console.log(data.name);
 
 		if (response.ok) {
 			navigateTo('dashboard');
@@ -395,7 +394,7 @@
 	}
 
 	function showLoginSelect(addHistory = true){
-		navigateTo('loginSelect', addHistory);
+		navigateTo('loginSelection', addHistory);
 	}
 
 	function showSignUp(addHistory = true) {
@@ -470,12 +469,28 @@
 
 	// ログアウト処理
 	function logout() {
-		localStorage.removeItem('access_token');
+		console.log("ログアウト処理開始");
+	
+		// ローカルストレージ削除
+		localStorage.clear();
+		console.log("localStorage 全削除");
+	
+		// ナビゲーション無効化
 		enableNavigation(false);
-		showLoginSelect(true);
+		console.log("ナビゲーション無効化");
+	
+		// `history.pushState()` をクリアして `popstate` が発火しないようにする
+		history.pushState(null, '', location.pathname);  // これで `hash` をリセット
+	
+		// `history.replaceState()` を使用して履歴を書き換え
+		history.replaceState({}, '', '#loginSelection');
+		console.log("履歴を置換: loginSelection");
+	
+		// 画面を遷移
+		navigateTo('loginSelection', false);
 	}
-
-
+	
+	
 	// ページ読み込み時の処理（URLの `#` を元に復元）
 	document.addEventListener('DOMContentLoaded', () => {
 		const canvas = document.getElementById("pongCanvas");
@@ -611,7 +626,6 @@
 							<p class="card-text">最大参加可能人数: ${tournament.max_participants}</p>
 							<button class="btn btn-success" onclick="registerPlayer('${tournament.id}')">プレイヤー登録</button>
 							<button class="btn btn-warning" onclick="startTournament('${tournament.id}')">試合開始</button>
-							<button class="btn btn-primary" onclick="viewTournament('${tournament.id}')">詳細</button>
 						</div>
 					</div>
 				`).join("");
