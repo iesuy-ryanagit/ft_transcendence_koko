@@ -2,6 +2,7 @@
 	const TournamentBase = 'http://localhost:8002/api/';
 	const GameBase = 'http://localhost:8001/api/';
 	let selectedTournamentId = null; 
+	let settings;
 
 	let matchId = null;
 	let gameState = null;
@@ -744,7 +745,7 @@ async function startTournament(tournamentId) {
             throw new Error("ゲーム設定の取得に失敗しました。");
         }
 
-		const settings = {
+		settings = {
 			ball_speed: gameSettings.ball_speed,
 			timer: gameSettings.timer
 		}
@@ -807,7 +808,7 @@ async function updatePaddlePosition() {
     }
 
     // console.log(`Player1 Y: ${player1.y}, Player2 Y: ${player2.y}`);
-
+	console.log("ball_speed", settings.ball_speed);
     // API にパドルの新しい位置を送信
     try {
         const response = await fetch(`${GameBase}pong/data/`, {
@@ -817,7 +818,8 @@ async function updatePaddlePosition() {
                 match_id: matchId,
                 paddles: {
                     player1: { y: player1.y },
-                    player2: { y: player2.y }
+                    player2: { y: player2.y },
+					ball_speed: settings.ball_speed
                 }
             })
         });
