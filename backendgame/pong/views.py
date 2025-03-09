@@ -7,7 +7,7 @@ import requests, time
 from django.conf import settings
 from django.contrib.auth import get_user_model
 import random
-
+from math import sin, cos, radians, sqrt
 User = get_user_model()
 
 # ゲームの状態を保持する辞書（実際のプロダクションでは、より適切なストレージ方法を使用する）
@@ -127,10 +127,17 @@ def match_data(request):
     if request.method == 'PATCH':
         # PATCHリクエストの場合、ボディからmatch_idを取得（クエリパラメータも許可）
         match_id = request.data.get('match_id') or request.query_params.get('match_id')
+        ball_speed_str = request.data.get('ball_speed', None) or request.query_params.get('ball_speed', None)
+        game_timer = request.query_params.get('game_timer', None) or request.query_params.get('game_timer', None)
     else:  # GET
         # GETリクエストの場合、クエリパラメータからmatch_idを取得
         match_id = request.query_params.get('match_id')
+        ball_speed_str = request.query_params.get('ball_speed', None)
+        game_timer = request.query_params.get('game_timer', None)
     
+    ball_speed =DEFAULT_BALL_SPEED
+    if ball_speed_str is not None:
+       ball_speed = float(ball_speed_str)
     if not match_id:
         return Response(
             {'error': 'Match ID is required'},
@@ -190,11 +197,11 @@ def match_data(request):
         if next_x <= 0:
             # player2の得点
             game_state['scores']['player2'] += 1
-            reset_ball_position(game_state)
+            reset_ball_position(game_state, ball_speed)
         elif next_x >= CANVAS_WIDTH:
             # player1の得点
             game_state['scores']['player1'] += 1
-            reset_ball_position(game_state)
+            reset_ball_position(game_state,ball_speed)
         
         # ゲーム終了判定
         if (game_state['scores']['player1'] >= MAX_SCORE or 
@@ -210,12 +217,14 @@ def match_data(request):
         
         return JsonResponse(game_state)
 
-def reset_ball_position(game_state):
+def reset_ball_position(game_state, ball_speed):
     """ボールを中央に戻し、ランダムな方向に設定"""
+    sita = 360 *random.random()
+    speed_with_root2 = ball_speed * sqrt(2)
     game_state['ball'].update({
         'x': CANVAS_WIDTH / 2,
         'y': CANVAS_HEIGHT / 2,
-        'dx': DEFAULT_BALL_SPEED * (1 if random.random() > 0.5 else -1),
-        'dy': DEFAULT_BALL_SPEED * (1 if random.random() > 0.5 else -1)
+        'dx':  speed_with_root2 * cos(radians(sita)),
+        'dy':  speed_with_root2 * sin(radians(sita))
     })
 
