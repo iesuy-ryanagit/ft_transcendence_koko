@@ -819,8 +819,8 @@ async function updatePaddlePosition() {
                 paddles: {
                     player1: { y: player1.y },
                     player2: { y: player2.y },
-					ball_speed: settings.ball_speed
-                }
+                },
+                ball_speed: settings.ball_speed
             })
         });
 

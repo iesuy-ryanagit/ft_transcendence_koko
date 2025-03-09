@@ -135,7 +135,7 @@ def match_data(request):
         ball_speed_str = request.query_params.get('ball_speed', None)
         game_timer = request.query_params.get('game_timer', None)
     
-    ball_speed =DEFAULT_BALL_SPEED
+    ball_speed = DEFAULT_BALL_SPEED
     if ball_speed_str is not None:
        ball_speed = float(ball_speed_str)
     if not match_id:
@@ -157,7 +157,8 @@ def match_data(request):
         # クライアントから送られてきた更新データを適用
         update_data = request.data
         game_state = game_states[match_id]
-        
+        if ball_speed_str is not None:
+            game_state['ball_speed'] = ball_speed
         # パドルの位置のみ更新（フロントエンドから受け取る）
         if 'paddles' in update_data:
             for player, paddle_data in update_data['paddles'].items():
@@ -220,11 +221,13 @@ def match_data(request):
 def reset_ball_position(game_state, ball_speed):
     """ボールを中央に戻し、ランダムな方向に設定"""
     sita = 360 *random.random()
+    if (sita > 75 and sita < 105) or (sita > 255 and sita < 285):
+        sita += 45 
     speed_with_root2 = ball_speed * sqrt(2)
     game_state['ball'].update({
         'x': CANVAS_WIDTH / 2,
         'y': CANVAS_HEIGHT / 2,
         'dx':  speed_with_root2 * cos(radians(sita)),
-        'dy':  speed_with_root2 * sin(radians(sita))
+        'dy':  speed_with_root2 * sin(radians(sita)),
     })
 
