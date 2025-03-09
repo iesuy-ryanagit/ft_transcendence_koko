@@ -707,38 +707,30 @@
 document.addEventListener("keydown", (event) => {
     if (event.key === "ArrowUp") {
         upPressed = true;
-        console.log("ArrowUp Pressed");
     }
     if (event.key === "ArrowDown") {
         downPressed = true;
-        console.log("ArrowDown Pressed");
     }
     if (event.key === "w") {
         wPressed = true;
-        console.log("W Pressed");
     }
     if (event.key === "s") {
         sPressed = true;
-        console.log("S Pressed");
     }
 });
 
 document.addEventListener("keyup", (event) => {
     if (event.key === "ArrowUp") {
         upPressed = false;
-        console.log("ArrowUp Released");
     }
     if (event.key === "ArrowDown") {
         downPressed = false;
-        console.log("ArrowDown Released");
     }
     if (event.key === "w") {
         wPressed = false;
-        console.log("W Released");
     }
     if (event.key === "s") {
         sPressed = false;
-        console.log("S Released");
     }
 });
 
@@ -766,7 +758,8 @@ async function startTournament(tournamentId) {
 			credentials: 'include',
             body: JSON.stringify({
                 match_id: tournamentId,
-				settings
+				ball_speed: gameSettings.ball_speed,
+				game_timer: gameSettings.timer
             })
         });
 
@@ -813,7 +806,7 @@ async function updatePaddlePosition() {
         player2.y += player2.dy;
     }
 
-    console.log(`Player1 Y: ${player1.y}, Player2 Y: ${player2.y}`);
+    // console.log(`Player1 Y: ${player1.y}, Player2 Y: ${player2.y}`);
 
     // API にパドルの新しい位置を送信
     try {

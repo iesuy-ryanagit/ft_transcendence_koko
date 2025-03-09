@@ -48,8 +48,10 @@ def match_start(request):
         match_id = request.query_params.get('match_id', None)
         ball_speed_str = request.query_params.get('ball_speed', None)
         game_timer = request.query_params.get('game_timer', None)
-
-	ball_speed = DEFAULT_BALL_SPEED
+    
+    ball_speed = DEFAULT_BALL_SPEED
+    if ball_speed_str is not None:
+       ball_speed = float(ball_speed_str)
     # マッチIDがない場合は、デモ用のIDを生成
     # if not match_id:
     #     match_id = 'demo_game'
@@ -105,11 +107,11 @@ def match_start(request):
     }
     
     # タイマーが設定されている場合は追加
-    # if game_timer:
-    #     game_state['timer'] = {
-    #         'duration': game_timer,  # 秒単位
-    #         'start_time': int(time.time())  # 現在のUNIXタイムスタンプ
-    #     }
+    if game_timer:
+        game_state['timer'] = {
+            'duration': game_timer,  # 秒単位
+            'start_time': int(time.time())  # 現在のUNIXタイムスタンプ
+        }
     
     # ゲーム状態をマッチIDに紐づけて保存
     game_states[match_id] = game_state
