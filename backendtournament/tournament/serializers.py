@@ -93,7 +93,6 @@ class TournamentJoinSerializer(serializers.Serializer):
         
         TournamentParticipant.objects.create(
             tournament=tournament,
-            user=user,
             alias=user.username
         )
         return tournament
@@ -146,7 +145,7 @@ class TournamentListSerializer(serializers.ModelSerializer):
 class TournamentParticipantDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = TournamentParticipant
-        fields = ['id', 'alias', 'user']
+        fields = ['id', 'alias']
 
 class MatchDetailSerializer(serializers.ModelSerializer):
     player1 = TournamentParticipantDetailSerializer(read_only=True)
