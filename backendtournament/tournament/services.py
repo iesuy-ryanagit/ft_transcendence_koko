@@ -113,20 +113,19 @@ def start_tournament(tournament: Tournament):
 
 	if target > num_participants:
 		missing = target - num_participants
-		User = get_user_model()
-		try:
-			test_user = User.objects.get(username="testuser")
-		except User.DoesNotExist:
-			raise Exception("Test user not found")
+		# User = get_user_model()
+		# try:
+		# 	test_user = User.objects.get(username="testuser")
+		# except User.DoesNotExist:
+		# 	raise Exception("Test user not found")
 		
 		for i in range(missing):
-			if i == 0 and not any(tp.user == "test_user" for tp in participants):
+			if i == 0 and not any(tp.alias == "test_user" for tp in participants):
 				alias = "testuser"
 			else:
 				alias = f"testuser{i+1}"
 			TournamentParticipant.objects.create(
 				tournament=tournament,
-				user=test_user,
 				alias=alias
 			)
 
