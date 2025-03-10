@@ -133,7 +133,7 @@ class TournamentFinishView(APIView):
     
 
 class TournamentStartView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = TournamentStartSerializer(data=request.data)
