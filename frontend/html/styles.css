@@ -1,4 +1,22 @@
 /* 画面中央に配置 */
+/* デフォルト設定 */
+body {
+    font-size: 16px;
+    color: #000;
+    background-color: #fff;
+}
+
+/* 文字サイズ */
+.font-small { font-size: 14px; }
+.font-medium { font-size: 16px; }
+.font-large { font-size: 20px; }
+.font-xlarge { font-size: 24px; }
+
+/* コントラスト設定 */
+.normal { color: #000; background-color: #fff; }
+.high-contrast { color: #fff; background-color: #000; font-weight: bold; }
+.dark-mode { color: #ddd; background-color: #222; }
+
 .auth-container {
     width: 50%;  /* 入力欄を短く */
     max-width: 90%;
