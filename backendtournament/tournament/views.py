@@ -47,7 +47,7 @@ class CreateTournamenView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class JoinTournamentView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = TournamentJoinSerializer(data=request.data, context={'request': request})
@@ -133,7 +133,7 @@ class TournamentFinishView(APIView):
     
 
 class TournamentStartView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = TournamentStartSerializer(data=request.data)
