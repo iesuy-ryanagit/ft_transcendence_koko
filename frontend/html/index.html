@@ -9,32 +9,64 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation">
 		<div class="container-fluid">
 			<a class="navbar-brand" href="#">PING-PONG</a>
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="ナビゲーションの切り替え">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarNav">
 				<ul class="navbar-nav ms-auto">
 					<li class="nav-item">
-						<a class="nav-link disabled" href="javascript:void(0);" id="nav-dashboard" onclick="navigateTo('dashboard')">
+						<a class="nav-link disabled" href="javascript:void(0);" id="nav-dashboard" onclick="navigateTo('dashboard')" role="button">
 							ダッシュボード
 						</a>
-					</li>					
-					<li class="nav-item">
-						<a class="nav-link disabled" href="#" id="nav-tfasign" onclick="showTFARegister()">2FA登録</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link disabled" href="#" id="nav-logout" onclick="logout()">ログアウト</a>
+						<a class="nav-link disabled" href="javascript:void(0);" id="nav-accessibility" onclick="navigateTo('accessibility-settings')" role="button">
+							アクセシビリティ
+						</a>
+					</li>				
+					<li class="nav-item">
+						<a class="nav-link disabled" href="#" id="nav-tfasign" onclick="showTFARegister()" role="button">2FA登録</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link disabled" href="#" id="nav-logout" onclick="logout()" role="button">ログアウト</a>
 					</li>
 				</ul>
 			</div>
 		</div>
 	</nav>
 	
+	
 
-    <div class="container mt-5">
+    <div class="container mt-5" role="main">
+		<div id="accessibility-settings" class="page d-none">
+			<h2>アクセシビリティ設定</h2>
+			<section>
+				<h3>文字サイズ</h3>
+				<label for="font-size" class="form-label">サイズを選択:</label>
+				<select id="font-size" class="form-select">
+					<option value="small">小</option>
+					<option value="medium" selected>標準</option>
+					<option value="large">大</option>
+					<option value="xlarge">特大</option>
+				</select>
+			</section>
+
+			<section class="mt-3">
+				<h3>コントラスト</h3>
+				<label for="contrast-mode" class="form-label">テーマを選択:</label>
+				<select id="contrast-mode" class="form-select">
+					<option value="normal" selected>通常</option>
+					<option value="high-contrast">高コントラスト</option>
+					<option value="dark-mode">ダークモード</option>
+				</select>
+			</section>
+
+			<button class="btn btn-primary mt-3" id="save-settings">保存</button>
+			<button class="btn btn-secondary mt-2" onclick="navigateTo('dashboard')">戻る</button>
+		</div>
 		<!-- ゲーム画面 -->
 		<div id="game-screen" class="page d-none">
 			<h2>ピンポンゲーム</h2>
@@ -44,7 +76,8 @@
 				<button class="btn btn-danger w-100" onclick="endGame()">試合終了</button>
 			</div>
 		</div>
-		<div id="loginSelection" class="page">
+
+		<div id="loginSelection" class="page" role="region" aria-labelledby="login-selection-title">
 			<h2>ログイン方式を選択</h2>
 			<button class="btn btn-primary w-100" onclick="navigateTo('login')">通常ログイン</button>
 			<button class="btn btn-warning w-100 mt-2" onclick="navigateTo('tfalogin')">2FAログイン</button>
@@ -54,7 +87,7 @@
 		</div>
 
         <!-- 2FAログイン画面 -->
-		<div id="tfalogin" class="page d-none">
+		<div id="tfalogin" class="page d-none" role="region" aria-labelledby="tfa-login-title">
 			<h2>2FAログイン</h2>
 			<input type="text" class="form-control auth-input" id="tfalogin-username" placeholder="ユーザー名">
 			<input type="password" class="form-control auth-input" id="tfalogin-password" placeholder="パスワード">
@@ -64,7 +97,7 @@
 		</div>
 
         <!-- ログイン画面 -->
-        <div id="login" class="page d-none">
+        <div id="login" class="page d-none" role="region" aria-labelledby="login-title">
             <h2>ログイン</h2>
             <input type="text" class="form-control auth-input" id="login-username" placeholder="ユーザー名">
             <input type="password" class="form-control auth-input" id="login-password" placeholder="パスワード">
@@ -73,7 +106,7 @@
         </div>
 
         <!-- 新規登録画面 -->
-        <div id="signup" class="page d-none">
+        <div id="signup" class="page d-none" role="region" aria-labelledby="signup-title">
             <h2>新規登録</h2>
             <input type="text" class="form-control auth-input" id="signup-username" placeholder="ユーザー名">
             <input type="password" class="form-control auth-input" id="signup-password" placeholder="パスワード">
@@ -82,14 +115,14 @@
         </div>
 
         <!-- ダッシュボード -->
-		<div id="dashboard" class="page d-none">
+		<div id="dashboard" class="page d-none" role="region" aria-labelledby="dashboard-title">
 			<h2>ダッシュボード</h2>
 			<button class="btn btn-primary" onclick="navigateTo('tournament-management')">トーナメント管理</button>
 			<button class="btn btn-warning" onclick="navigateTo('game-settings')">ゲーム設定を変更</button>
 		</div>
 
 		<!-- トーナメント管理画面 -->
-		<div id="tournament-management" class="page d-none">
+		<div id="tournament-management" class="page d-none" role="region" aria-labelledby="tournament-management-title">
 			<h2>トーナメント管理</h2>
 			<button class="btn btn-primary w-100 my-2" onclick="navigateTo('tournament-list')">トーナメント一覧</button>
 			<button class="btn btn-success w-100 my-2" onclick="navigateTo('create-tournament')">新規トーナメント作成</button>
@@ -149,15 +182,8 @@
             <button class="btn btn-secondary" onclick="navigateTo('dashboard')">戻る</button>
         </div>
 
-        <!-- プロフィール画面 -->
-        <div id="profile" class="page d-none">
-            <h2>プロフィール</h2>
-            <p><strong>ユーザー名:</strong> <span id="profile-username">未ログイン</span></p>
-            <button class="btn btn-secondary" onclick="navigateTo('dashboard')">戻る</button>
-        </div>
-
 		<!--2FA登録画面-->
-		<div id="TFAregister" class="page d-none">
+		<div id="TFAregister" class="page d-none" role="region" aria-labelledby="tfa-register-title">
 			<h2>2FAの設定</h2>
 			<p>以下のQRコードをGoogle Authenticatorなどのアプリでスキャンしてください。</p>
 			<div id="tfa-qr-image" src="" alt="2FA QRコード" class="img-fluid"></div>

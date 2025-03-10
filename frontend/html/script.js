@@ -238,6 +238,7 @@
 		document.getElementById('nav-dashboard').classList.toggle('disabled', !enable);;
 		document.getElementById('nav-logout').classList.toggle('disabled', !enable);
 		document.getElementById('nav-tfasign').classList.toggle('disabled', !enable);
+		document.getElementById('nav-accessibility').classList.toggle('disabled', !enable);
 	}
 
 	// 画面遷移関数
@@ -490,48 +491,80 @@
 		// 画面を遷移
 		navigateTo('loginSelection', false);
 	}
+
+	document.addEventListener("DOMContentLoaded", () => {
+		const fontSizeSelect = document.getElementById("font-size");
+		const contrastSelect = document.getElementById("contrast-mode");
 	
+		if (fontSizeSelect && contrastSelect) {
+			fontSizeSelect.addEventListener("change", () => {
+				localStorage.setItem("font-size", fontSizeSelect.value);
+				applyAccessibilitySettings();
+			});
+	
+			contrastSelect.addEventListener("change", () => {
+				localStorage.setItem("contrast-mode", contrastSelect.value);
+				applyAccessibilitySettings();
+			});
+		}
+	});
 	
 	// ページ読み込み時の処理（URLの `#` を元に復元）
 	document.addEventListener('DOMContentLoaded', () => {
 		const canvas = document.getElementById("pongCanvas");
-		const ctx = canvas.getContext("2d");
+		const ctx = canvas ? canvas.getContext("2d") : null;
 	
 		if (!canvas || !ctx) {
 			console.error("Canvasが取得できませんでした");
-			return;
 		}
+	
 		const backButton = document.querySelector("#TFAregister .btn-secondary");
-		
 		if (backButton) {
 			backButton.addEventListener("click", async function () {
 				await sendTFAExitRequest();
 				navigateTo("dashboard");
 			});
 		}
-
+	
 		// スライダーの値を表示に反映
 		const ballSpeedSlider = document.getElementById('ball-speed');
 		const ballSpeedValue = document.getElementById('ball-speed-value');
-		
+	
 		if (ballSpeedSlider && ballSpeedValue) {
 			ballSpeedSlider.addEventListener('input', function () {
 				ballSpeedValue.textContent = this.value;
 			});
 		}
-
+	
+		// アクセシビリティ設定を適用
+		applyAccessibilitySettings();
+	
 		// ページ読み込み時にゲーム設定をロード
 		if (document.getElementById('game-settings')) {
 			loadGameSettings();
 		}
-
+	
 		const token = localStorage.getItem('access_token');
 		enableNavigation(!!token);
-
+	
 		// 初回ロード時にURLの `#` に応じて画面を表示
 		const page = location.hash.replace('#', '') || 'loginSelection';
 		navigateTo(token ? page : 'loginSelection', false);
 	});
+
+	function applyAccessibilitySettings() {
+		const savedFontSize = localStorage.getItem("font-size") || "medium";
+		const savedContrast = localStorage.getItem("contrast-mode") || "normal";
+	
+		// すべてのサイズクラスを削除して、新しい設定を適用
+		document.body.classList.remove("font-small", "font-medium", "font-large", "font-xlarge");
+		document.body.classList.add(`font-${savedFontSize}`);
+	
+		// すべてのコントラストクラスを削除して、新しい設定を適用
+		document.body.classList.remove("normal", "high-contrast", "dark-mode");
+		document.body.classList.add(savedContrast);
+	}
+	
 
 
 	async function saveGameSettings() {
@@ -835,7 +868,6 @@ async function updatePaddlePosition() {
 
 
 // 最新のゲーム状態を取得
-
 async function fetchGameState() {
     if (!matchId || isFetching) return;  // すでにリクエスト中ならスキップ
     isFetching = true;  // リクエスト開始
@@ -887,26 +919,29 @@ function drawGame() {
 
     // 試合終了処理
     if (gameState.match_end) {
-        alert("試合終了！");
         navigateTo("dashboard");
     }
 }
 
 function gameLoop() {
     updatePaddlePosition();  // キー入力を反映
+
     requestAnimationFrame(gameLoop);  // 次のフレームを描画
 }
+
 
 // ゲーム開始時に gameLoop を呼び出す
 requestAnimationFrame(gameLoop);
 
 function renderLoop() {
     drawGame();  // 常に最新の gameState を描画
+
     requestAnimationFrame(renderLoop);  // 次のフレームを描画
 }
 
 // ゲーム開始時に renderLoop を呼び出す
 requestAnimationFrame(renderLoop);
+
 
 
 // 100ms に変更して負荷を軽減
