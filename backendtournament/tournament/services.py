@@ -53,7 +53,7 @@ def	process_match_result(match: Match, winner: User, score: str): # type: ignore
 		status="pending"
 	)
 	if remaining_matches.exists():
-		return "Next round pending"
+		return {"status": "next_round_pending","matches":None}
 	
 	#3. ALL matches in the current round are completed
 	# Retrieve the matches in the order they were created
@@ -73,7 +73,7 @@ def	process_match_result(match: Match, winner: User, score: str): # type: ignore
 		tournament.current_round = current_round
 		tournament.end_time = timezone.now()
 		tournament.save()
-		return "Tournament completed"
+		return {"status": "tournament_completed", "matches":None}
 	
 	#4. Create matches for the next round
 	new_round = current_round + 1
@@ -94,7 +94,7 @@ def	process_match_result(match: Match, winner: User, score: str): # type: ignore
 	tournament.current_round = new_round
 	tournament.save()
 
-	return new_matches
+	return {"status": "goto_nextround", "matches" : new_matches}
 
 
 def start_tournament(tournament: Tournament):
