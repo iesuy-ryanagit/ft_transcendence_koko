@@ -90,9 +90,9 @@ class MatchEndView(APIView):
             match = serializer.save()
             result = process_match_result(match, match.winner, match.final_score)
 
-            if isinstance(result, list):
-                serialized_matches = MatchDetailSerializer(result, many=True).data
-                next_round = serialized_matches
+            if isinstance(result, dict) and 'status' in result and result['status'] == "goto_nextround" :
+                serialized_matches = MatchDetailSerializer(result['matches'], many=True).data
+                next_round = {"status": "goto_nextround", "matches" : serialized_matches}
             else:
                 next_round = result
 
