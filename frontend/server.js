@@ -3,6 +3,11 @@ const fs = require('fs');
 const path = require('path');
 
 const server = http.createServer((req, res) => {
+    if (req.method !== 'GET') {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('403 Forbidden');
+        return;
+    }
     const basePath = req.url.split('?')[0];  // '?' より前の部分だけを取得
     const filePath = path.join(__dirname, basePath === '/' ? '/home/index.html' : basePath);
 
