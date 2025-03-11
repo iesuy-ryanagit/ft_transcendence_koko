@@ -1,4 +1,4 @@
-const apiBase = 'http://localhost:8000/api/';
+const apiBase = 'http://localhost:8000/api/account/';
 
 $(window).on("popstate", function (event) {
     // 現在のURLのハッシュ部分を取得して、適切なページに遷移
