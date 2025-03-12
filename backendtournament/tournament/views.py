@@ -106,9 +106,10 @@ class MatchEndView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class TournamentListView(generics.ListAPIView):
-    """List all tournaments"""
-    queryset = Tournament.objects.all().order_by('-created_at')
+    """List all tournaments with status 'pending'"""
+    queryset = Tournament.objects.filter(status='pending').order_by('-created_at')
     serializer_class = TournamentListSerializer
+
 
 class TournamentDetailView(generics.RetrieveAPIView):
     queryset = Tournament.objects.all()
