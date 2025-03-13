@@ -1,16 +1,12 @@
 from tournament.models import Tournament, Match, TournamentParticipant
-from django.contrib.auth import get_user_model
 from django.utils import timezone
 import random
 
-User = get_user_model()
 
 def create_tournament_schedule(tournament: Tournament):
 	"""Aoutmatically first schedule of Tournament"""
 	print(f"Creating schedule for {tournament.name}")
-	participants_qs = TournamentParticipant.objects.filter(tournament=tournament)
-	participants = [tp.user for tp in participants_qs]
-	print(f"Participants: {participants}")
+	participants = list(TournamentParticipant.objects.filter(tournament=tournament))
 	
 	random.shuffle(participants)
 	matches = []
@@ -35,7 +31,7 @@ def create_tournament_schedule(tournament: Tournament):
 
 	return matches
 
-def	process_match_result(match: Match, winner: User, score: str): # type: ignore
+def	process_match_result(match: Match, winner: None, score: str): # type: ignore
 	"""Record winner of the match, Generate next round match"""
 	match.winner = winner
 	match.final_score = score
@@ -106,7 +102,7 @@ def start_tournament(tournament: Tournament):
 	num_participants = len(participants)
 
 	target = num_participants
-	if num_participants in [1, 3]:
+	if num_participants in [0,1,2,3]:
 		target = 4
 	elif num_participants in [5, 6, 7]:
 		target = 8
