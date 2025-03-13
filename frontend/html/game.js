@@ -144,7 +144,7 @@
 	document.getElementById("playerRegisterModal").style.display = "none";
 }
 
- function submitPlayerRegistration() {
+function submitPlayerRegistration() {
 	alias = document.getElementById("playerNameInput").value;
 	if (!alias) {
 		alert("プレイヤー名を入力してください");
@@ -161,16 +161,27 @@
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ tournament_id: selectedTournamentId, alias })
 	})
-	.then(response => response.json())
+	.then(response => {
+		if (!response.ok) {
+			// JSONに変換してからエラーメッセージ抽出
+			return response.json().then(errData => {
+				throw new Error(errData.message || '登録に失敗しました');
+			});
+		}
+		// OKだった場合
+		return response.json();
+	})
 	.then(data => {
+		console.log(data);
 		alert("プレイヤーが登録されました！");
 		closeModal();  // 登録後にモーダルを閉じる
 	})
 	.catch(error => {
 		console.error("登録エラー:", error);
-		alert("登録に失敗しました");
+		alert("登録に失敗しました: " + error.message);
 	});
 }
+
 
 // ゲーム開始 (APIから状態を取得して描画)
 // キー入力のリスニング
