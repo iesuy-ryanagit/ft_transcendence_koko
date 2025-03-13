@@ -472,6 +472,7 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 		else if (data.next_round.status == 'tournament_completed')
 		{
 			//勝利者がどっちかを表示してもいいかも？
+			enableNavigation(true);
 			navigateTo('dashboard');
 		}
 
@@ -526,6 +527,7 @@ try {
 
 // 試合リスト表示
 function displayMatches(matches) {
+	enableNavigation(false);
 	const container = document.getElementById('match-list-container');
 	container.innerHTML = '';
 
