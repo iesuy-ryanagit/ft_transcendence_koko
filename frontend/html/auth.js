@@ -204,11 +204,9 @@ function logout() {
 
     // ローカルストレージ削除
     localStorage.clear();
-    console.log("localStorage 全削除");
 
     // ナビゲーション無効化
     enableNavigation(false);
-    console.log("ナビゲーション無効化");
 
     // `history.pushState()` をクリアして `popstate` が発火しないようにする
     history.pushState(null, '', location.pathname);  // これで `hash` をリセット

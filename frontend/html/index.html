@@ -11,7 +11,7 @@
 <body>
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation">
 		<div class="container-fluid">
-			<a class="navbar-brand" href="#">PING-PONG</a>
+			<span class="navbar-brand">PING-PONG</span>
 			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="ナビゲーションの切り替え">
 				<span class="navbar-toggler-icon"></span>
 			</button>
@@ -72,9 +72,6 @@
 			<h2>ピンポンゲーム</h2>
 			<div id="scoreboard" class="text-center my-2">Player 1: 0 | Player 2: 0</div>
 			<canvas id="pongCanvas" width="800" height="400" style="border: 2px solid black;"></canvas>
-			<div class="my-3">
-				<button class="btn btn-danger w-100" onclick="endGame()">試合終了</button>
-			</div>
 		</div>
 
 		<div id="loginSelection" class="page" role="region" aria-labelledby="login-selection-title">
@@ -195,10 +192,18 @@
 
 	<div id="match-list-page" class="page d-none">
 		<h2>試合一覧</h2>
+	
+		<!-- ⚠ 注意文言 -->
+		<p style="color: red; font-weight: bold; text-align: center;">
+			⚠ 試合中はページのリロードやブラウザの「戻る」ボタンを押さないでください。<br>
+			試合情報が失われる可能性があります。
+		</p>
+	
 		<div id="match-list-container" class="list-group" aria-label="試合リスト">
 			<!-- ここに試合リストが動的に挿入される -->
 		</div>
 	</div>
+	
 
     <script src="settings.js"></script>
 	<script src="auth.js"></script>
