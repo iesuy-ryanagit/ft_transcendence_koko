@@ -3,7 +3,10 @@
  let renderLoopId = requestAnimationFrame(renderLoop);
  let fetchGameStateInterval; // ゲーム状態取得ループを制御するID
  let now_matches;
-
+ function validateInput3(input) {
+    const regex = /^[a-zA-Z0-9]+$/;
+    return regex.test(input);
+ }
  async function saveGameSettings() {
 	const ball_speed = document.getElementById('ball-speed').value;
 	const timer = document.getElementById('match-duration').value;
@@ -146,6 +149,10 @@
 
 function submitPlayerRegistration() {
 	alias = document.getElementById("playerNameInput").value;
+    if (!validateInput3(alias)) {
+        alert('入力は全て数字かアルファベットでならなければいけない');
+        return; // 入力が不正なら処理を中断
+    }
 	if (!alias) {
 		alert("プレイヤー名を入力してください");
 		return;

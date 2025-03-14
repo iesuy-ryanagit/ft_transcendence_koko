@@ -1,4 +1,8 @@
 
+function validateInput2(input) {
+    const regex = /^[a-zA-Z0-9]+$/;
+    return regex.test(input);
+}
 
 async function fetchTournaments() {
 	const token = localStorage.getItem('access_token');
@@ -30,7 +34,10 @@ async function createTournament() {
 	const name = document.getElementById('tournament-name').value;
 	const max_participants = 4;
 	const token = localStorage.getItem('access_token');
-
+    if (!validateInput(name)) {
+        alert('入力は全て数字かアルファベットでならなければいけない');
+        return; // 入力が不正なら処理を中断
+    }
 	const response = await fetch(TournamentBase + 'tournament/create/', {
 		method: 'POST',
 		headers: { 

@@ -69,7 +69,6 @@ class JoinTournamentParticipantView(APIView):
             participant = serializer.save()
             tournament = participant.tournament
             if tournament.tournament_participants.count() >= tournament.max_participants:
-                    create_tournament_schedule(tournament)
                     if tournament.tournament_participants.count() > tournament.max_participants:
                         return Response({"message":"Tournament is full"}, status=status.HTTP_400_BAD_REQUEST)                     
             return Response(
