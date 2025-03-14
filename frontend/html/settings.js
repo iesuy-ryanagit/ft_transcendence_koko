@@ -27,6 +27,8 @@ let player2_id;
 let isGameEnded = false; // 試合が終了したかどうか
 
 	$(window).on("popstate", function (event) {
+		stopGameLoop();
+        enableNavigation(true);
 		let page = location.hash.replace('#', '');
 		if (!page || !document.getElementById(page)) {
 			page = 'loginSelection'; // 存在しないページなら loginSelection にする
