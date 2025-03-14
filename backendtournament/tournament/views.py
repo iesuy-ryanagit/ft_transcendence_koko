@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
+# from .jwts import generate_jwt,JWTAuthentication
 
 from .models import Tournament
 from .serializers import (
@@ -21,7 +22,12 @@ from .services import create_tournament_schedule, process_match_result, start_to
 
 # Create your views here.
 class CreateTournamenView(APIView):
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [
+    #     JWTAuthentication,
+    # ]
+    # permission_classes = [
+    #     IsAuthenticated,
+    # ]
 
     def post(self, request):
         serializer = TournamentSerializer(data=request.data, context={'request': request})
@@ -41,7 +47,7 @@ class CreateTournamenView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class JoinTournamentView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = TournamentJoinSerializer(data=request.data, context={'request': request})
@@ -55,16 +61,17 @@ class JoinTournamentView(APIView):
     
 
 class JoinTournamentParticipantView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = TournamentParticipantSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             participant = serializer.save()
             tournament = participant.tournament
-
             if tournament.tournament_participants.count() >= tournament.max_participants:
                     create_tournament_schedule(tournament)
+                    if tournament.tournament_participants.count() > tournament.max_participants:
+                        return Response({"message":"Tournament is full"}, status=status.HTTP_400_BAD_REQUEST)                     
             return Response(
                 {
                     "message": "Joined tournament participant successfully",
@@ -73,10 +80,11 @@ class JoinTournamentParticipantView(APIView):
                 },
                 status=status.HTTP_200_OK
             )
+        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class MatchEndView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = MatchEndSerializer(data=request.data)
@@ -84,9 +92,9 @@ class MatchEndView(APIView):
             match = serializer.save()
             result = process_match_result(match, match.winner, match.final_score)
 
-            if isinstance(result, list):
-                serialized_matches = MatchDetailSerializer(result, many=True).data
-                next_round = serialized_matches
+            if isinstance(result, dict) and 'status' in result and result['status'] == "goto_nextround" :
+                serialized_matches = MatchDetailSerializer(result['matches'], many=True).data
+                next_round = {"status": "goto_nextround", "matches" : serialized_matches}
             else:
                 next_round = result
 
@@ -100,16 +108,17 @@ class MatchEndView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class TournamentListView(generics.ListAPIView):
-    """List all tournaments"""
-    queryset = Tournament.objects.all().order_by('-created_at')
+    """List all tournaments with status 'pending'"""
+    queryset = Tournament.objects.filter(status='pending').order_by('-created_at')
     serializer_class = TournamentListSerializer
+
 
 class TournamentDetailView(generics.RetrieveAPIView):
     queryset = Tournament.objects.all()
     serializer_class = TournamentDetailSerializer
 
 class TournamentFinishView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = TournamentFinishSerializer(data=request.data)
@@ -127,14 +136,13 @@ class TournamentFinishView(APIView):
     
 
 class TournamentStartView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = TournamentStartSerializer(data=request.data)
         if serializer.is_valid():
             tournament_id = serializer.validated_data['tournament_id']
             tournament = Tournament.objects.get(id=tournament_id)
-
             try:
                 matches = start_tournament(tournament)
             except Exception as e:

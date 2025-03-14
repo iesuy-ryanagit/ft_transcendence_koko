@@ -1,4 +1,22 @@
 /* 画面中央に配置 */
+/* デフォルト設定 */
+body {
+    font-size: 16px;
+    color: #000;
+    background-color: #fff;
+}
+
+/* 文字サイズ */
+.font-small { font-size: 14px; }
+.font-medium { font-size: 16px; }
+.font-large { font-size: 20px; }
+.font-xlarge { font-size: 24px; }
+
+/* コントラスト設定 */
+.normal { color: #000; background-color: #fff; }
+.high-contrast { color: #fff; background-color: #000; font-weight: bold; }
+.dark-mode { color: #ddd; background-color: #222; }
+
 .auth-container {
     width: 50%;  /* 入力欄を短く */
     max-width: 90%;
@@ -24,4 +42,31 @@
 /* ボタンの幅を統一 */
 .w-100 {
     width: 100%;
+}
+
+.modal {
+    display: none; /* 最初は非表示 */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.close {
+    float: right;
+    font-size: 28px;
+    cursor: pointer;
 }

@@ -7,7 +7,7 @@ import requests, time
 from django.conf import settings
 from django.contrib.auth import get_user_model
 import random
-
+from math import sin, cos, radians, sqrt
 User = get_user_model()
 
 # ゲームの状態を保持する辞書（実際のプロダクションでは、より適切なストレージ方法を使用する）
@@ -36,6 +36,7 @@ def notify_tournament_match_end(match_id, winner, final_score):
 
 @api_view(['POST', 'GET'])
 def match_start(request):
+
     """ゲームの初期状態を設定して返す"""
     # トーナメントシステムからのマッチIDを取得
     # POSTリクエストの場合はボディから、GETリクエストの場合はクエリパラメータから取得
@@ -47,26 +48,29 @@ def match_start(request):
         match_id = request.query_params.get('match_id', None)
         ball_speed_str = request.query_params.get('ball_speed', None)
         game_timer = request.query_params.get('game_timer', None)
-    ball_speed = float(game_setting.ball_speed) * DEFAULT_BALL_SPEED
+    
+    ball_speed = DEFAULT_BALL_SPEED
+    if ball_speed_str is not None:
+       ball_speed = float(ball_speed_str)
     # マッチIDがない場合は、デモ用のIDを生成
-    if not match_id:
-        match_id = 'demo_game'
+    # if not match_id:
+    #     match_id = 'demo_game'
     
     # ユーザーのゲーム設定を取得（認証されている場合）
-    ball_speed = DEFAULT_BALL_SPEED
-    game_timer = None
+    # ball_speed = DEFAULT_BALL_SPEED
+    # game_timer = None
     
-    if request.user.is_authenticated:
-        try:
-            game_setting = GameSetting.objects.get(user=request.user)
-            # ボールスピードを設定から取得（float型に変換）
-            ball_speed = float(game_setting.ball_speed) * DEFAULT_BALL_SPEED
-            # タイマーを設定から取得
-            if game_setting.timer > 0:
-                game_timer = game_setting.timer
-        except GameSetting.DoesNotExist:
-            # 設定がない場合はデフォルト値を使用
-            pass
+    # if request.user.is_authenticated:
+    #     try:
+    #         game_setting = GameSetting.objects.get(user=request.user)
+    #         # ボールスピードを設定から取得（float型に変換）
+    #         ball_speed = float(game_setting.ball_speed) * DEFAULT_BALL_SPEED
+    #         # タイマーを設定から取得
+    #         if game_setting.timer > 0:
+    #             game_timer = game_setting.timer
+    #     except GameSetting.DoesNotExist:
+    #         # 設定がない場合はデフォルト値を使用
+    #         pass
     
     game_state = {
         'ball': {
@@ -111,7 +115,6 @@ def match_start(request):
     
     # ゲーム状態をマッチIDに紐づけて保存
     game_states[match_id] = game_state
-    
     return JsonResponse({
         'match_id': match_id,
         'state': game_state
@@ -124,10 +127,17 @@ def match_data(request):
     if request.method == 'PATCH':
         # PATCHリクエストの場合、ボディからmatch_idを取得（クエリパラメータも許可）
         match_id = request.data.get('match_id') or request.query_params.get('match_id')
+        ball_speed_str = request.data.get('ball_speed', None) or request.query_params.get('ball_speed', None)
+        game_timer = request.query_params.get('game_timer', None) or request.query_params.get('game_timer', None)
     else:  # GET
         # GETリクエストの場合、クエリパラメータからmatch_idを取得
         match_id = request.query_params.get('match_id')
+        ball_speed_str = request.query_params.get('ball_speed', None)
+        game_timer = request.query_params.get('game_timer', None)
     
+    ball_speed = DEFAULT_BALL_SPEED
+    if ball_speed_str is not None:
+       ball_speed = float(ball_speed_str)
     if not match_id:
         return Response(
             {'error': 'Match ID is required'},
@@ -147,7 +157,8 @@ def match_data(request):
         # クライアントから送られてきた更新データを適用
         update_data = request.data
         game_state = game_states[match_id]
-        
+        if ball_speed_str is not None:
+            game_state['ball_speed'] = ball_speed
         # パドルの位置のみ更新（フロントエンドから受け取る）
         if 'paddles' in update_data:
             for player, paddle_data in update_data['paddles'].items():
@@ -187,11 +198,11 @@ def match_data(request):
         if next_x <= 0:
             # player2の得点
             game_state['scores']['player2'] += 1
-            reset_ball_position(game_state)
+            reset_ball_position(game_state, ball_speed)
         elif next_x >= CANVAS_WIDTH:
             # player1の得点
             game_state['scores']['player1'] += 1
-            reset_ball_position(game_state)
+            reset_ball_position(game_state,ball_speed)
         
         # ゲーム終了判定
         if (game_state['scores']['player1'] >= MAX_SCORE or 
@@ -207,12 +218,16 @@ def match_data(request):
         
         return JsonResponse(game_state)
 
-def reset_ball_position(game_state):
+def reset_ball_position(game_state, ball_speed):
     """ボールを中央に戻し、ランダムな方向に設定"""
+    sita = 360 *random.random()
+    if (sita > 75 and sita < 105) or (sita > 255 and sita < 285):
+        sita += 45 
+    speed_with_root2 = ball_speed * sqrt(2)
     game_state['ball'].update({
         'x': CANVAS_WIDTH / 2,
         'y': CANVAS_HEIGHT / 2,
-        'dx': DEFAULT_BALL_SPEED * (1 if random.random() > 0.5 else -1),
-        'dy': DEFAULT_BALL_SPEED * (1 if random.random() > 0.5 else -1)
+        'dx':  speed_with_root2 * cos(radians(sita)),
+        'dy':  speed_with_root2 * sin(radians(sita)),
     })
 

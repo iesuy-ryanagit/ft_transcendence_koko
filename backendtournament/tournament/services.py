@@ -1,16 +1,12 @@
 from tournament.models import Tournament, Match, TournamentParticipant
-from django.contrib.auth import get_user_model
 from django.utils import timezone
 import random
 
-User = get_user_model()
 
 def create_tournament_schedule(tournament: Tournament):
 	"""Aoutmatically first schedule of Tournament"""
 	print(f"Creating schedule for {tournament.name}")
-	participants_qs = TournamentParticipant.objects.filter(tournament=tournament)
-	participants = [tp.user for tp in participants_qs]
-	print(f"Participants: {participants}")
+	participants = list(TournamentParticipant.objects.filter(tournament=tournament))
 	
 	random.shuffle(participants)
 	matches = []
@@ -35,7 +31,7 @@ def create_tournament_schedule(tournament: Tournament):
 
 	return matches
 
-def	process_match_result(match: Match, winner: User, score: str): # type: ignore
+def	process_match_result(match: Match, winner: None, score: str): # type: ignore
 	"""Record winner of the match, Generate next round match"""
 	match.winner = winner
 	match.final_score = score
@@ -53,7 +49,7 @@ def	process_match_result(match: Match, winner: User, score: str): # type: ignore
 		status="pending"
 	)
 	if remaining_matches.exists():
-		return "Next round pending"
+		return {"status": "next_round_pending","matches":None}
 	
 	#3. ALL matches in the current round are completed
 	# Retrieve the matches in the order they were created
@@ -73,7 +69,7 @@ def	process_match_result(match: Match, winner: User, score: str): # type: ignore
 		tournament.current_round = current_round
 		tournament.end_time = timezone.now()
 		tournament.save()
-		return "Tournament completed"
+		return {"status": "tournament_completed", "matches":None}
 	
 	#4. Create matches for the next round
 	new_round = current_round + 1
@@ -94,7 +90,7 @@ def	process_match_result(match: Match, winner: User, score: str): # type: ignore
 	tournament.current_round = new_round
 	tournament.save()
 
-	return new_matches
+	return {"status": "goto_nextround", "matches" : new_matches}
 
 
 def start_tournament(tournament: Tournament):
@@ -106,27 +102,26 @@ def start_tournament(tournament: Tournament):
 	num_participants = len(participants)
 
 	target = num_participants
-	if num_participants in [1, 3]:
+	if num_participants in [0,1,2,3]:
 		target = 4
 	elif num_participants in [5, 6, 7]:
 		target = 8
 
 	if target > num_participants:
 		missing = target - num_participants
-		User = get_user_model()
-		try:
-			test_user = User.objects.get(username="testuser")
-		except User.DoesNotExist:
-			raise Exception("Test user not found")
+		# User = get_user_model()
+		# try:
+		# 	test_user = User.objects.get(username="testuser")
+		# except User.DoesNotExist:
+		# 	raise Exception("Test user not found")
 		
 		for i in range(missing):
-			if i == 0 and not any(tp.user == "test_user" for tp in participants):
+			if i == 0 and not any(tp.alias == "test_user" for tp in participants):
 				alias = "testuser"
 			else:
 				alias = f"testuser{i+1}"
 			TournamentParticipant.objects.create(
 				tournament=tournament,
-				user=test_user,
 				alias=alias
 			)
 
