@@ -1,10 +1,20 @@
-
+function validateInput(input) {
+    const regex = /^[a-zA-Z0-9]+$/;
+    return regex.test(input);
+}
 
 // ログイン処理
  async function login_action() {
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
-
+    if (!validateInput(username)) {
+        alert('入力は全て数字かアルファベットでならなければいけない');
+        return; // 入力が不正なら処理を中断
+    }
+    if (!validateInput(password)) {
+        alert('入力は全て数字かアルファベットでならなければいけない');
+        return; // 入力が不正なら処理を中断
+    }
     const response = await fetch(apiBase + 'login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -61,7 +71,18 @@ async function loginWith2FA() {
 	const username = document.getElementById('tfalogin-username').value;
 	const password = document.getElementById('tfalogin-password').value;
 	const otp = document.getElementById('tfalogin-token').value;
-
+    if (!validateInput(username)) {
+        alert('入力は全て数字かアルファベットでならなければいけない');
+        return; // 入力が不正なら処理を中断
+    }
+    if (!validateInput(password)) {
+        alert('入力は全て数字かアルファベットでならなければいけない');
+        return; // 入力が不正なら処理を中断
+    }
+    if (!validateInput(otp)) {
+        alert('入力は全て数字かアルファベットでならなければいけない');
+        return; // 入力が不正なら処理を中断
+    }
 	const response = await fetch(apiBase + 'login-tfa/', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -163,7 +184,14 @@ if (code) {
 async function signUp() {
 	const username = document.getElementById('signup-username').value;
 	const password = document.getElementById('signup-password').value;
-
+    if (!validateInput(username)) {
+        alert('入力は全て数字かアルファベットでならなければいけない');
+        return; // 入力が不正なら処理を中断
+    }
+    if (!validateInput(password)) {
+        alert('入力は全て数字かアルファベットでならなければいけない');
+        return; // 入力が不正なら処理を中断
+    }
 	const response = await fetch(apiBase + 'signup/', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
