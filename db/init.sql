@@ -1,1 +1,3 @@
 CREATE DATABASE account_db;
+CREATE DATABASE game_db;
+CREATE DATABASE tournament_db;
