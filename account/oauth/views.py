@@ -80,8 +80,8 @@ class OauthLoginView(views.APIView):
                 key="jwt",
                 value=jwt,
                 max_age=86400,
-                secure=False,
-                httponly=False,
+                secure=True,
+                httponly=True,
                 samesite=None,
             )
             return (response)
@@ -95,8 +95,8 @@ class OauthLoginView(views.APIView):
                     key="jwt",
                     value=jwt,
                     max_age=86400,
-                    secure=False,
-                    httponly=False,
+                    secure=True,
+                    httponly=True,
                     samesite=None,
                 )
                 return response
