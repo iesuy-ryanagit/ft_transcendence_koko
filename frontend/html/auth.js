@@ -289,7 +289,7 @@ async function sendTFAExitRequest() {
 	try {
 		console.log("2FA終了リクエスト送信中...");
 
-		const response = await fetch(apiBase + 'signup-tfa/',  {
+		const response = await fetch(apiBase + 'setup-tfa/',  {
 			method: "POST",
 			headers: {
 				"Authorization": `Bearer ${token}`,
