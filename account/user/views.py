@@ -17,6 +17,8 @@ class SetupTFAView(views.APIView):
         user = request.user
         device = TOTPDevice.objects.filter(user=user, confirmed=False).first()
         if not device:
+            device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
+        if not device:
             device = TOTPDevice.objects.create(user=user, confirmed=False)
         uri = device.config_url
         secret_key = device.bin_key.hex()
