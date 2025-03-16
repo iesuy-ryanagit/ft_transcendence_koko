@@ -70,8 +70,9 @@ class OauthLoginView(views.APIView):
         user_name = user_data.get('login')
         data = {
             'username': user_name,
-            'password': user_name,
+            'password': user_name + "42Tokyo",
         }
+        print(user_name + "42Tokyo")
         user = authenticate(username=user_name, password=user_name)
         if user:
             jwt = generate_jwt(user)

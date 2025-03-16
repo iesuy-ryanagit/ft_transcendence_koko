@@ -110,7 +110,7 @@ AUTH_USER_MODEL = 'user.CustomUser'  # Specify the custom user model
 
 OAUTH2_CLIENT_ID = 'u-s4t2ud-81923ac28a11204fc202b778f94590288865e752e6c9f23a209ae9dfc52ca486'  # 42から取得したClient ID
 OAUTH2_CLIENT_SECRET = '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'  # 42から取得したClient Secret
-OAUTH2_REDIRECT_URI = 'http://localhost/html/index.html'  # 42のOAuth2設定で設定したリダイレクトURI
+OAUTH2_REDIRECT_URI = 'https://localhost/html/index.html'  # 42のOAuth2設定で設定したリダイレクトURI
 
 
 #cookie
