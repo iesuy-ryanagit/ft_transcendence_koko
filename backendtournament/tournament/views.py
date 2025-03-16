@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
-# from .jwts import generate_jwt,JWTAuthentication
+from .jwts import JWTNoUserAuthentication
 
 from .models import Tournament
 from .serializers import (
@@ -22,12 +22,8 @@ from .services import create_tournament_schedule, process_match_result, start_to
 
 # Create your views here.
 class CreateTournamenView(APIView):
-    # authentication_classes = [
-    #     JWTAuthentication,
-    # ]
-    # permission_classes = [
-    #     IsAuthenticated,
-    # ]
+    authentication_classes = [JWTNoUserAuthentication,]
+    permission_classes = [AllowAny,]
 
     def post(self, request):
         serializer = TournamentSerializer(data=request.data, context={'request': request})
@@ -47,7 +43,8 @@ class CreateTournamenView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class JoinTournamentView(APIView):
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTNoUserAuthentication,]
+    permission_classes = [AllowAny,]
 
     def post(self, request):
         serializer = TournamentJoinSerializer(data=request.data, context={'request': request})
@@ -61,7 +58,8 @@ class JoinTournamentView(APIView):
     
 
 class JoinTournamentParticipantView(APIView):
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTNoUserAuthentication,]
+    permission_classes = [AllowAny,]
 
     def post(self, request):
         serializer = TournamentParticipantSerializer(data=request.data, context={'request': request})
@@ -83,7 +81,8 @@ class JoinTournamentParticipantView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class MatchEndView(APIView):
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTNoUserAuthentication,]
+    permission_classes = [AllowAny,]
 
     def post(self, request):
         serializer = MatchEndSerializer(data=request.data)
@@ -107,17 +106,22 @@ class MatchEndView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class TournamentListView(generics.ListAPIView):
+    authentication_classes = [JWTNoUserAuthentication,]
+    permission_classes = [AllowAny,]
     """List all tournaments with status 'pending'"""
     queryset = Tournament.objects.filter(status='pending').order_by('-created_at')
     serializer_class = TournamentListSerializer
 
 
 class TournamentDetailView(generics.RetrieveAPIView):
+    authentication_classes = [JWTNoUserAuthentication,]
+    permission_classes = [AllowAny,]
     queryset = Tournament.objects.all()
     serializer_class = TournamentDetailSerializer
 
 class TournamentFinishView(APIView):
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTNoUserAuthentication,]
+    permission_classes = [AllowAny,]
 
     def post(self, request):
         serializer = TournamentFinishSerializer(data=request.data)
@@ -135,7 +139,8 @@ class TournamentFinishView(APIView):
     
 
 class TournamentStartView(APIView):
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTNoUserAuthentication,]
+    permission_classes = [AllowAny,]
 
     def post(self, request):
         serializer = TournamentStartSerializer(data=request.data)
@@ -158,11 +163,15 @@ class TournamentStartView(APIView):
     
 
 class TournamentResultDetailView(generics.RetrieveAPIView):
+    authentication_classes = [JWTNoUserAuthentication,]
+    permission_classes = [AllowAny,]
     queryset = Tournament.objects.all()
     serializer_class = TournamentResultSerializer
     lookup_field = 'id'
 
 class TournamentResultListView(generics.ListAPIView):
+    authentication_classes = [JWTNoUserAuthentication,]
+    permission_classes = [AllowAny,]
     queryset = Tournament.objects.all()
     serializer_class = TournamentResultSerializer
     
