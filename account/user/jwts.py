@@ -9,7 +9,7 @@ SECRET_KEY = "hello"
 def generate_jwt(user):
     timestamp = int(time.time()) + 60 * 60 * 24 * 7  # 1週間後
     encoded = jwt.encode(
-        {"userid": user.pk, "username": user.username, "exp": timestamp},
+        {"login": "login","userid": user.pk, "username": user.username, "exp": timestamp},
         SECRET_KEY,
         algorithm="HS256"
     )
