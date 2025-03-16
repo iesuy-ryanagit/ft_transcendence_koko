@@ -7,9 +7,12 @@
     const regex = /^[a-zA-Z0-9]+$/;
     return regex.test(input);
  }
+ let player1_alias;
+ let player2_alias;
+
  async function saveGameSettings() {
 	const ball_speed = document.getElementById('ball-speed').value;
-	const timer = document.getElementById('match-duration').value;
+	const timer = 60;
 	const token = localStorage.getItem('access_token'); // 認証トークン
 
 	if (!token) {
@@ -77,25 +80,22 @@
 		console.log("取得したデータ:", data); // 取得したデータを確認
 
 		// `ballSpeed` や `timer` が存在しない場合のエラーチェック
-		if (!data || data.ball_speed === undefined || data.timer === undefined) {
+		if (!data || data.ball_speed === undefined) {
 			console.log(data.ball_speed)
-			console.log(data.timer)
 			throw new Error("APIレスポンスに必要なデータがありません");
 		}
 
 		// HTML要素の取得
 		const ballSpeedInput = document.getElementById('ball-speed');
 		const ballSpeedValue = document.getElementById('ball-speed-value');
-		const matchDuration = document.getElementById('match-duration');
 
-		if (!ballSpeedInput || !ballSpeedValue || !matchDuration) {
+		if (!ballSpeedInput || !ballSpeedValue) {
 			throw new Error("HTML要素が見つかりません");
 		}
 
 		// 取得したデータをUIに反映
 		ballSpeedInput.value = data.ballSpeed;
 		ballSpeedValue.textContent = data.ballSpeed;
-		matchDuration.value = data.timer;
 
 		console.log("ゲーム設定を更新しました");
 		return data; // 取得したデータを返す
@@ -224,10 +224,12 @@ document.addEventListener("keyup", (event) => {
 
 
 // ゲーム開始処理	
- async function startMatch(_matchId) {
+ async function startMatch(_matchId, alias_one, alias_two) {
 	stopGameLoop(); 
     gameState = null; // 新しい試合用に初期化
     isGameEnded = false; // フラグもリセット
+	player1_alias = alias_one;
+	player2_alias = alias_two;
 try {
 	const gameSettings = await loadGameSettings();
 	if (!gameSettings) throw new Error("ゲーム設定の取得に失敗しました。");
@@ -378,7 +380,7 @@ function drawGame() {
 
 	// スコア表示更新
 	document.getElementById("scoreboard").textContent =
-		`${gameState.paddles.player1.alias}: ${gameState.scores.player1} | ${gameState.paddles.player2.alias}: ${gameState.scores.player2}`;
+		`${player1_alias}: ${gameState.scores.player1} | ${player2_alias}: ${gameState.scores.player2}`;
 
 	// 試合終了処理 (一度だけ実行)
 	// drawGame内の試合終了処理
@@ -551,7 +553,7 @@ function displayMatches(matches) {
 	let actionButton = '';
 	if (match.status === 'pending') {
 		// 試合開始ボタン（クリック可能）
-		actionButton = `<button class="btn btn-primary" onclick="startMatch('${match.id}')">試合開始</button>`;
+		actionButton = `<button class="btn btn-primary" onclick="startMatch('${match.id}', '${match.player1.alias}', '${match.player2.alias}')">試合開始</button>`;
 	} else if (match.status === 'ongoing') {
 		// 試合中表示（クリック不可）
 		actionButton = `<button class="btn btn-warning" disabled>試合中</button>`;
