@@ -87,7 +87,7 @@
 		<div id="tfalogin" class="page d-none" role="region" aria-labelledby="tfa-login-title">
 			<h2>2FAログイン</h2>
 			<input type="text" class="form-control auth-input" id="tfalogin-username" placeholder="ユーザー名">
-			<input type="password" class="form-control auth-input" id="tfalogin-password" placeholder="パスワード">
+			<input type="text" class="form-control auth-input" id="tfalogin-password" placeholder="パスワード">
 			<input type="text" class="form-control auth-input mt-2" id="tfalogin-token" placeholder="認証コード">
 			<button class="btn btn-primary w-100" onclick="loginWith2FA()">ログイン</button>
 			<button class="btn btn-secondary w-100 mt-2" onclick="navigateTo('loginSelection')">戻る</button>
@@ -97,7 +97,7 @@
         <div id="login" class="page d-none" role="region" aria-labelledby="login-title">
             <h2>ログイン</h2>
             <input type="text" class="form-control auth-input" id="login-username" placeholder="ユーザー名">
-            <input type="password" class="form-control auth-input" id="login-password" placeholder="パスワード">
+            <input type="text" class="form-control auth-input" id="login-password" placeholder="パスワード">
             <button class="btn btn-primary w-100" onclick="login_action()">ログイン</button>
             <button class="btn btn-secondary w-100 mt-2" onclick="navigateTo('signup')">新規登録</button>
         </div>
@@ -106,7 +106,7 @@
         <div id="signup" class="page d-none" role="region" aria-labelledby="signup-title">
             <h2>新規登録</h2>
             <input type="text" class="form-control auth-input" id="signup-username" placeholder="ユーザー名">
-            <input type="password" class="form-control auth-input" id="signup-password" placeholder="パスワード">
+            <input type="text" class="form-control auth-input" id="signup-password" placeholder="パスワード">
             <button class="btn btn-primary w-100" onclick="signUp()">登録</button>
             <button class="btn btn-secondary w-100 mt-2" onclick="navigateTo('loginSelection')">ログイン選択画面へ</button>
         </div>
