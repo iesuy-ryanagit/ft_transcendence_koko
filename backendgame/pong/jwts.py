@@ -2,8 +2,7 @@ import time
 import jwt
 from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication
-
-SECRET_KEY = "hello"
+from django.conf import settings
 
 class JWTNoUserAuthentication(BaseAuthentication):
     keyword = "JWT"
@@ -17,7 +16,7 @@ class JWTNoUserAuthentication(BaseAuthentication):
                 raise exceptions.AuthenticationFailed("Lacking token")
 
             # JWTトークンをデコード
-            jwt_info = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            jwt_info = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
             login = jwt_info.get("login")
 
             # loginが存在すれば、ユーザー関係なく認証通過
