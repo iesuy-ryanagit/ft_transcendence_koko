@@ -150,20 +150,12 @@ CSRF_COOKIE_SECURE = False  # HTTPS接続がない場合はCSRFクッキーを�
 SESSION_COOKIE_SECURE = False  # セッションIDのクッキーをセキュアにしない
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",  # フロントエンドのURL
-    "http://127.0.0.1:3000",  # 127.0.0.1 を許可
-    "http://localhost:80",  # フロントエンドのURL
-    "http://127.0.0.1:80",  # 127.0.0.1 を許可
-    "http://localhost",
+    "https://localhost",
 ]
 
 # settings.pyに追加
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # フロントエンドのURL
-    "http://127.0.0.1:3000",  # 127.0.0.1 を許可
-    "http://localhost:80",  # フロントエンドのURL
-    "http://127.0.0.1:80",  # 127.0.0.1 を許可
-    "http://localhost",
+    "https://localhost",
 ]
 
 ALLOWED_HOSTS = [
