@@ -59,7 +59,8 @@
 
  async function loadGameSettings() {
 	const token = localStorage.getItem('access_token'); // 認証トークン
-
+    if (!token)
+        return ;
 	try {
 		const response = await fetch(apiBase + 'setup-game/', {
 			method: 'GET',
