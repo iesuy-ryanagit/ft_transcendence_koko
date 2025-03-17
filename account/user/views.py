@@ -113,8 +113,9 @@ class LogoutView(views.APIView):
         IsAuthenticated,
     ]
     def get(self, request, *args, **kwargs):
+        response = Response({'status': 'success'}, status=status.HTTP_200_OK)
         response.delete_cookie("jwt")
-        return Response({'status': 'success'}, status=status.HTTP_200_OK)
+        return response
 
 class ProfileView(views.APIView):
     authentication_classes = [
