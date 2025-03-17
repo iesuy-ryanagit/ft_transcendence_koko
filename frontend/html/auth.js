@@ -227,9 +227,20 @@ async function setUpTfa() {
 }
 
 // ログアウト処理
-function logout() {
+async function logout() {
     console.log("ログアウト処理開始");
+	const response = await fetch(apiBase + 'logout/', {
+		method: 'GET',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include'  // 必要なら追加
+	});
 
+	const data = await response.json();
+	if (response.ok) {
+		alert('ログアウト成功!');
+	} else {
+		alert('ログアウト失敗');
+	}
     // ローカルストレージ削除
     localStorage.clear();
 
