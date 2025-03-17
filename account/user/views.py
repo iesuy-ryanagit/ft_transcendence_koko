@@ -84,18 +84,6 @@ class SignupView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(views.APIView):
-    def get(self, request, *args, **kwargs):
-        jwt = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-        response = Response({'status': 'success','jwt': jwt}, status=status.HTTP_200_OK)
-        response.set_cookie(
-            key="jwt",
-            value=jwt,
-            max_age=86400,
-            secure=True,
-            httponly=True,
-            samesite=None,
-            )
-        return response
     def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
