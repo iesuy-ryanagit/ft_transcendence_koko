@@ -114,26 +114,16 @@ TOKEN_URL = os.environ.get('TOKEN_URL')
 USER_URL = os.environ.get('USER_URL')
 
 #cookie
-SECURE_SSL_REDIRECT = False  # ローカル開発環境ではHTTPSリダイレクトは不要
-CSRF_COOKIE_SECURE = False  # HTTPS接続がない場合はCSRFクッキーをセキュアにしない
-SESSION_COOKIE_SECURE = False  # セッションIDのクッキーをセキュアにしない
+SECURE_SSL_REDIRECT = False
+CSRF_COOKIE_SECURE = False  
+SESSION_COOKIE_SECURE = False  
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",  # フロントエンドのURL
-    "http://127.0.0.1:3000",  # 127.0.0.1 を許可
-    "http://localhost:80",  # フロントエンドのURL
-    "http://127.0.0.1:80",  # 127.0.0.1 を許可
-    "http://localhost",
     "https://localhost",
 ]
 
 # settings.pyに追加
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # フロントエンドのURL
-    "http://127.0.0.1:3000",  # 127.0.0.1 を許可
-    "http://localhost:80",  # フロントエンドのURL
-    "http://127.0.0.1:80",  # 127.0.0.1 を許可
-    "http://localhost",
     "https://localhost",
 ]
 
@@ -148,8 +138,7 @@ CORS_ALLOW_ALL_ORIGINS = False
 # settings.py
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SAMESITE = 'None'  # 開発環境用
-CSRF_COOKIE_SAMESITE = 'None'  # 開発環境用
-# クッキー関連の設定（特に、クロスオリジンリクエストを扱う場合に重要）
+SESSION_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = 'None'
 
 CORS_PREFLIGHT_MAX_AGE = 60 * 30
