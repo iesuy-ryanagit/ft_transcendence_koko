@@ -2,7 +2,6 @@ from pathlib import Path
 import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -100,18 +99,19 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-SECRET_KEY = 'change-me-please' 
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # Custom user model
 AUTH_USER_MODEL = 'user.CustomUser'  # Specify the custom user model
 
 
+OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID')
+OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET')
+OAUTH2_REDIRECT_URI = os.environ.get('OAUTH2_REDIRECT_URI')
 
-
-OAUTH2_CLIENT_ID = 'u-s4t2ud-81923ac28a11204fc202b778f94590288865e752e6c9f23a209ae9dfc52ca486'  # 42から取得したClient ID
-OAUTH2_CLIENT_SECRET = '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'  # 42から取得したClient Secret
-OAUTH2_REDIRECT_URI = 'https://localhost/html/index.html'  # 42のOAuth2設定で設定したリダイレクトURI
-
+OAUTH_URL = os.environ.get('OAUTH_URL')
+TOKEN_URL = os.environ.get('TOKEN_URL')
+USER_URL = os.environ.get('USER_URL')
 
 #cookie
 SECURE_SSL_REDIRECT = False  # ローカル開発環境ではHTTPSリダイレクトは不要
