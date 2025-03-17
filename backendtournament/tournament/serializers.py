@@ -1,9 +1,6 @@
 from rest_framework import serializers
 from tournament.models import Tournament, Match, TournamentParticipant
 from django.utils import timezone
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
 
 class TournamentSerializer(serializers.ModelSerializer):
     # auto_join is a boolean field that is to join the tournament automatically when created
