@@ -11,8 +11,7 @@ RUN mkdir -p /etc/nginx/ssl && \
 COPY ./nginx.conf /etc/nginx/nginx.conf
 
 # ポート80を公開
-EXPOSE 80
-EXPOSE 443
+EXPOSE 4423
 
 # コンテナのデフォルトのコマンドを設定（Nginxを起動）
 CMD ["nginx", "-g", "daemon off;"]
