@@ -1,8 +1,8 @@
 // gameVariables.js
 
- const apiBase = 'https://localhost:443/api/account/';
- const TournamentBase = 'https://localhost:443/api/';
- const GameBase = 'https://localhost:443/api/';
+ const apiBase = 'https://localhost:4423/api/account/';
+ const TournamentBase = 'https://localhost:4423/api/';
+ const GameBase = 'https://localhost:4423/api/';
 
  let selectedTournamentId = null;
 
