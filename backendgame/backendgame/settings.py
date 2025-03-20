@@ -145,9 +145,9 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #cookie
-SECURE_SSL_REDIRECT = False  # ローカル開発環境ではHTTPSリダイレクトは不要
-CSRF_COOKIE_SECURE = False  # HTTPS接続がない場合はCSRFクッキーをセキュアにしない
-SESSION_COOKIE_SECURE = False  # セッションIDのクッキーをセキュアにしない
+SECURE_SSL_REDIRECT = True
+CSRF_COOKIE_SECURE =  True
+SESSION_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = [
     "https://localhost",
@@ -167,10 +167,13 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = False
 
 # settings.py
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE =  True
+CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'None'  # 開発環境用
 CSRF_COOKIE_SAMESITE = 'None'  # 開発環境用
 # クッキー関連の設定（特に、クロスオリジンリクエストを扱う場合に重要）
 
 CORS_PREFLIGHT_MAX_AGE = 60 * 30
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = True
