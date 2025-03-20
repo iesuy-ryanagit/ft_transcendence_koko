@@ -58,11 +58,11 @@ WSGI_APPLICATION = 'account.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "account_db",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
-        "HOST": "db",
-        "PORT": "5432",
+        "NAME": os.environ.get("ACCOUNT_DB_NAME"),
+        "USER": os.environ.get("POSTGRES_USER"),
+        "PASSWORD":  os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get("POSTGRES_HOST"),
+        "PORT": os.environ.get("POSTGRES_PORT"),
     }
 }
 
@@ -142,3 +142,4 @@ SESSION_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SAMESITE = 'None'
 
 CORS_PREFLIGHT_MAX_AGE = 60 * 30
+
