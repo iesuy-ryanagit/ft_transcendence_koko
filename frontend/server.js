@@ -9,7 +9,8 @@ const server = http.createServer((req, res) => {
         return;
     }
     const basePath = req.url.split('?')[0];  // '?' より前の部分だけを取得
-    const filePath = path.join(__dirname, basePath === '/' ? '/home/index.html' : basePath);
+    const tmpPath = path.join(__dirname, basePath === '/' ? '/home/index.html' : basePath);
+    const filePath = path.normalize(tmpPath);
 
   fs.readFile(filePath, (err, data) => {
     if (err) {
