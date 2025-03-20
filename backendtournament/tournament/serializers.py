@@ -49,7 +49,9 @@ class TournamentParticipantSerializer(serializers.ModelSerializer):
         
         if TournamentParticipant.objects.filter(tournament=tournament, alias=alias).exists():
             raise serializers.ValidationError("Alias already exists")
-    
+        restricted_aliases = ['testuser', 'testuser2', 'testuser3', 'testuser4']
+        if alias in restricted_aliases:
+            raise serializers.ValidationError(f"Alias '{alias}' is not allowed")
         
         data['tournament'] = tournament
         return data
