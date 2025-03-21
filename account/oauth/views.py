@@ -11,7 +11,7 @@ from user.serializers import SignupSerializer
 class OauthUrlView(views.APIView):
 
     def get(self, request, *args, **kwargs):
-        auth_url = 'https://api.intra.42.fr/oauth/authorize'
+        auth_url = settings.OAUTH_URL
         client_id = settings.OAUTH2_CLIENT_ID  
         client_secret = settings.OAUTH2_CLIENT_SECRET
         redirect_uri = settings.OAUTH2_REDIRECT_URI
@@ -37,7 +37,7 @@ class OauthLoginView(views.APIView):
         client_id = settings.OAUTH2_CLIENT_ID
         client_secret = settings.OAUTH2_CLIENT_SECRET
         redirect_uri = settings.OAUTH2_REDIRECT_URI
-        token_url = "https://api.intra.42.fr/oauth/token"
+        token_url = settings.TOKEN_URL
         # トークンを取得
         data = {
             'grant_type': 'authorization_code',
@@ -56,7 +56,7 @@ class OauthLoginView(views.APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         # トークンを取得したら、ユーザー情報を取得
         access_token = response.json().get('access_token')
-        user_url = "https://api.intra.42.fr/v2/me"
+        user_url = settings.USER_URL
         headers = {"Authorization": f"Bearer {access_token}"}
         user_response = requests.get(user_url, headers=headers)
         if user_response.status_code != 200:
@@ -70,9 +70,10 @@ class OauthLoginView(views.APIView):
         user_name = user_data.get('login')
         data = {
             'username': user_name,
-            'password': user_name,
+            'password': user_name + "42Tokyo",
         }
-        user = authenticate(username=user_name, password=user_name)
+        print(user_name + "42Tokyo")
+        user = authenticate(username=user_name, password=user_name + "42Tokyo")
         if user:
             jwt = generate_jwt(user)
             response = Response({'status': 'success','jwt': jwt}, status=status.HTTP_200_OK)
@@ -80,8 +81,8 @@ class OauthLoginView(views.APIView):
                 key="jwt",
                 value=jwt,
                 max_age=86400,
-                secure=False,
-                httponly=False,
+                secure=True,
+                httponly=True,
                 samesite=None,
             )
             return (response)
@@ -95,8 +96,8 @@ class OauthLoginView(views.APIView):
                     key="jwt",
                     value=jwt,
                     max_age=86400,
-                    secure=False,
-                    httponly=False,
+                    secure=True,
+                    httponly=True,
                     samesite=None,
                 )
                 return response

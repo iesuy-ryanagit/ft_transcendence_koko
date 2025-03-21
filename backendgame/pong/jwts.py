@@ -4,7 +4,6 @@ from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication
 from django.conf import settings
 
-
 class JWTNoUserAuthentication(BaseAuthentication):
     keyword = "JWT"
     model = None

@@ -1,8 +1,8 @@
 // gameVariables.js
 
- const apiBase = 'http://localhost:8000/api/';
- const TournamentBase = 'http://localhost:8002/api/';
- const GameBase = 'http://localhost:8001/api/';
+ const apiBase = window.env.ACCOUNT_HOST;
+ const TournamentBase = window.env.TOURNAMENT_HOST;
+ const GameBase = window.env.GAME_HOST;
 
  let selectedTournamentId = null;
 
@@ -27,6 +27,10 @@ let player2_id;
 let isGameEnded = false; // 試合が終了したかどうか
 
 	$(window).on("popstate", function (event) {
+		stopGameLoop();
+    	const token = localStorage.getItem("access_token");
+        if (token)
+            enableNavigation(true);
 		let page = location.hash.replace('#', '');
 		if (!page || !document.getElementById(page)) {
 			page = 'loginSelection'; // 存在しないページなら loginSelection にする
@@ -56,10 +60,10 @@ let isGameEnded = false; // 試合が終了したかどうか
 			return;
 		}
 	
-		if (location.hash === `#${page}`) {
-			console.log("Same page, skipping pushState");
-			return;
-		}
+		// if (location.hash === `#${page}`) {
+		// 	console.log("Same page, skipping pushState");
+		// 	return;
+		// }
 	
 		document.querySelectorAll('.page').forEach(p => p.classList.add('d-none'));
 	

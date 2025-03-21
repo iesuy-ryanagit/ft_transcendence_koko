@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import CustomUser
 from django.contrib.auth import authenticate
+from rest_framework.exceptions import ValidationError
+import re
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,7 +13,22 @@ class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['username', 'password']
-
+    def validate_username(self, value):
+        if CustomUser.objects.filter(username=value).exists():
+            raise ValidationError("This username is already taken.")
+        return value
+    def validate_password(self, value):
+        if len(value) < 5:
+            raise ValidationError("Password must be at least 8 characters long.")
+        if not re.search(r'[A-Z]', value):  # 大文字が含まれているか
+            raise ValidationError("Password must contain at least one uppercase letter.")
+        
+        if not re.search(r'[a-z]', value):  # 小文字が含まれているか
+            raise ValidationError("Password must contain at least one lowercase letter.")
+        
+        if not re.search(r'[0-9]', value):  # 数字が含まれているか
+            raise ValidationError("Password must contain at least one digit.")
+        return value
     def create(self, validated_data):
         user = CustomUser.objects.create_user(**validated_data)
         return user

@@ -8,8 +8,8 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 import random
 from math import sin, cos, radians, sqrt
-User = get_user_model()
-
+from .jwts import JWTNoUserAuthentication
+from rest_framework.permissions import AllowAny
 # ゲームの状態を保持する辞書（実際のプロダクションでは、より適切なストレージ方法を使用する）
 game_states = {}
 
@@ -36,7 +36,8 @@ def notify_tournament_match_end(match_id, winner, final_score):
 
 @api_view(['POST', 'GET'])
 def match_start(request):
-
+    authentication_classes = [JWTNoUserAuthentication,]
+    permission_classes = [AllowAny,]
     """ゲームの初期状態を設定して返す"""
     # トーナメントシステムからのマッチIDを取得
     # POSTリクエストの場合はボディから、GETリクエストの場合はクエリパラメータから取得
@@ -122,6 +123,8 @@ def match_start(request):
 
 @api_view(['GET', 'PATCH'])
 def match_data(request):
+    authentication_classes = [JWTNoUserAuthentication,]
+    permission_classes = [AllowAny,]
     """ゲームの状態を取得または更新する"""
     # マッチIDを取得（クエリパラメータまたはリクエストボディから）
     if request.method == 'PATCH':

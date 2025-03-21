@@ -2,7 +2,6 @@ from pathlib import Path
 import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -56,23 +55,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'account.wsgi.application'
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "postgres",
-#         "USER": "postgres",
-#         "PASSWORD": "postgres",
-#         "HOST": "db",
-#         "PORT": "5432",
-#     }
-# }
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',  # SQLite database file located in the base directory
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("ACCOUNT_DB_NAME"),
+        "USER": os.environ.get("POSTGRES_USER"),
+        "PASSWORD":  os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get("POSTGRES_HOST"),
+        "PORT": os.environ.get("POSTGRES_PORT"),
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',  # SQLite database file located in the base directory
+#     }
+# }
 
 
 # Password validation
@@ -100,54 +99,50 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-SECRET_KEY = 'change-me-please' 
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # Custom user model
 AUTH_USER_MODEL = 'user.CustomUser'  # Specify the custom user model
 
 
+OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID')
+OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET')
+OAUTH2_REDIRECT_URI = os.environ.get('OAUTH2_REDIRECT_URI')
 
-
-OAUTH2_CLIENT_ID = 'u-s4t2ud-81923ac28a11204fc202b778f94590288865e752e6c9f23a209ae9dfc52ca486'  # 42から取得したClient ID
-OAUTH2_CLIENT_SECRET = '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'  # 42から取得したClient Secret
-OAUTH2_REDIRECT_URI = 'http://localhost/html/index.html'  # 42のOAuth2設定で設定したリダイレクトURI
-
+OAUTH_URL = os.environ.get('OAUTH_URL')
+TOKEN_URL = os.environ.get('TOKEN_URL')
+USER_URL = os.environ.get('USER_URL')
 
 #cookie
-SECURE_SSL_REDIRECT = False  # ローカル開発環境ではHTTPSリダイレクトは不要
-CSRF_COOKIE_SECURE = False  # HTTPS接続がない場合はCSRFクッキーをセキュアにしない
-SESSION_COOKIE_SECURE = False  # セッションIDのクッキーをセキュアにしない
+SECURE_SSL_REDIRECT = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",  # フロントエンドのURL
-    "http://127.0.0.1:3000",  # 127.0.0.1 を許可
-    "http://localhost:80",  # フロントエンドのURL
-    "http://127.0.0.1:80",  # 127.0.0.1 を許可
-    "http://localhost",
+    "https://localhost",
 ]
 
 # settings.pyに追加
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # フロントエンドのURL
-    "http://127.0.0.1:3000",  # 127.0.0.1 を許可
-    "http://localhost:80",  # フロントエンドのURL
-    "http://127.0.0.1:80",  # 127.0.0.1 を許可
-    "http://localhost",
+    "https://localhost",
 ]
 
 ALLOWED_HOSTS = [
     'localhost', 
-    '127.0.0.1',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = False
 
 # settings.py
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SAMESITE = 'None'  # 開発環境用
-CSRF_COOKIE_SAMESITE = 'None'  # 開発環境用
-# クッキー関連の設定（特に、クロスオリジンリクエストを扱う場合に重要）
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = 'None'
 
 CORS_PREFLIGHT_MAX_AGE = 60 * 30
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = True
+
+LOGIN_KEY=os.environ.get('LOGIN_KEY')

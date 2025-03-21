@@ -59,7 +59,8 @@
 
  async function loadGameSettings() {
 	const token = localStorage.getItem('access_token'); // 認証トークン
-
+    if (!token)
+        return ;
 	try {
 		const response = await fetch(apiBase + 'setup-game/', {
 			method: 'GET',
@@ -426,7 +427,7 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 
 	try {
 		// ① 試合結果送信
-		const response = await fetch(`${TournamentBase}match/end/`, {
+		const response = await fetch(`${TournamentBase}tournament/match/end/`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'

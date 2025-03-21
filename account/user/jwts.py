@@ -3,14 +3,13 @@ import jwt
 from .models import CustomUser
 from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication
-
-SECRET_KEY = "hello"
+from django.conf import settings
 
 def generate_jwt(user):
     timestamp = int(time.time()) + 60 * 60 * 24 * 7  # 1週間後
     encoded = jwt.encode(
-        {"userid": user.pk, "username": user.username, "exp": timestamp},
-        SECRET_KEY,
+        {"login": settings.LOGIN_KEY,"userid": user.pk, "username": user.username, "exp": timestamp},
+        settings.SECRET_KEY,
         algorithm="HS256"
     )
     return encoded
@@ -25,7 +24,7 @@ class JWTAuthentication(BaseAuthentication):
             if not token:
                 return None
 
-            jwt_info = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            jwt_info = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
             userid = jwt_info.get("userid")
             if userid is None:
                 raise exceptions.AuthenticationFailed("Invalid token: lacking userid")

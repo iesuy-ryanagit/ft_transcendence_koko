@@ -17,6 +17,8 @@ class SetupTFAView(views.APIView):
         user = request.user
         device = TOTPDevice.objects.filter(user=user, confirmed=False).first()
         if not device:
+            device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
+        if not device:
             device = TOTPDevice.objects.create(user=user, confirmed=False)
         uri = device.config_url
         secret_key = device.bin_key.hex()
@@ -63,8 +65,8 @@ class LoginTFAView(views.APIView):
                     key="jwt",
                     value=jwt,
                     max_age=86400,
-                    secure=False,
-                    httponly=False,
+                    secure=True,
+                    httponly=True,
                     samesite=None,
                 )
                 return response
@@ -82,18 +84,6 @@ class SignupView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(views.APIView):
-    def get(self, request, *args, **kwargs):
-        jwt = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-        response = Response({'status': 'success','jwt': jwt}, status=status.HTTP_200_OK)
-        response.set_cookie(
-            key="jwt",
-            value=jwt,
-            max_age=86400,
-            secure=True,
-            httponly=True,
-            samesite=None,
-            )
-        return response
     def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -107,8 +97,8 @@ class LoginView(views.APIView):
                 key="jwt",
                 value=jwt,
                 max_age=86400,
-                secure=False,
-                httponly=False,
+                secure=True,
+                httponly=True,
                 samesite=None,
             )
             return response
@@ -123,8 +113,9 @@ class LogoutView(views.APIView):
         IsAuthenticated,
     ]
     def get(self, request, *args, **kwargs):
+        response = Response({'status': 'success'}, status=status.HTTP_200_OK)
         response.delete_cookie("jwt")
-        return Response({'status': 'success'}, status=status.HTTP_200_OK)
+        return response
 
 class ProfileView(views.APIView):
     authentication_classes = [

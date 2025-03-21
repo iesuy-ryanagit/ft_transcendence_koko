@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-6vbvq6dager_4*mlch9dx3v3ti=p'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -85,11 +85,22 @@ WSGI_APPLICATION = 'backendgame.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("GAME_DB_NAME"),
+        "USER": os.environ.get("POSTGRES_USER"),
+        "PASSWORD":  os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get("POSTGRES_HOST"),
+        "PORT": os.environ.get("POSTGRES_PORT"),
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -134,25 +145,17 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #cookie
-SECURE_SSL_REDIRECT = False  # ローカル開発環境ではHTTPSリダイレクトは不要
-CSRF_COOKIE_SECURE = False  # HTTPS接続がない場合はCSRFクッキーをセキュアにしない
-SESSION_COOKIE_SECURE = False  # セッションIDのクッキーをセキュアにしない
+SECURE_SSL_REDIRECT = True
+CSRF_COOKIE_SECURE =  True
+SESSION_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",  # フロントエンドのURL
-    "http://127.0.0.1:3000",  # 127.0.0.1 を許可
-    "http://localhost:80",  # フロントエンドのURL
-    "http://127.0.0.1:80",  # 127.0.0.1 を許可
-    "http://localhost",
+    "https://localhost",
 ]
 
 # settings.pyに追加
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # フロントエンドのURL
-    "http://127.0.0.1:3000",  # 127.0.0.1 を許可
-    "http://localhost:80",  # フロントエンドのURL
-    "http://127.0.0.1:80",  # 127.0.0.1 を許可
-    "http://localhost",
+    "https://localhost",
 ]
 
 ALLOWED_HOSTS = [
@@ -164,10 +167,15 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = False
 
 # settings.py
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE =  True
+CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'None'  # 開発環境用
 CSRF_COOKIE_SAMESITE = 'None'  # 開発環境用
 # クッキー関連の設定（特に、クロスオリジンリクエストを扱う場合に重要）
 
 CORS_PREFLIGHT_MAX_AGE = 60 * 30
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = True
+
+LOGIN_KEY=os.environ.get('LOGIN_KEY')

@@ -1,9 +1,6 @@
 from rest_framework import serializers
 from tournament.models import Tournament, Match, TournamentParticipant
 from django.utils import timezone
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
 
 class TournamentSerializer(serializers.ModelSerializer):
     # auto_join is a boolean field that is to join the tournament automatically when created
@@ -52,7 +49,9 @@ class TournamentParticipantSerializer(serializers.ModelSerializer):
         
         if TournamentParticipant.objects.filter(tournament=tournament, alias=alias).exists():
             raise serializers.ValidationError("Alias already exists")
-    
+        restricted_aliases = ['testuser', 'testuser2', 'testuser3', 'testuser4']
+        if alias in restricted_aliases:
+            raise serializers.ValidationError(f"Alias '{alias}' is not allowed")
         
         data['tournament'] = tournament
         return data
