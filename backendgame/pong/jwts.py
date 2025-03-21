@@ -20,7 +20,7 @@ class JWTNoUserAuthentication(BaseAuthentication):
             login = jwt_info.get("login")
 
             # loginが存在すれば、ユーザー関係なく認証通過
-            if login != "login":
+            if login != settings.LOGIN_KEY:
                 raise exceptions.AuthenticationFailed("Invalid token: missing login")
             
             # もし`login`があれば認証通過
