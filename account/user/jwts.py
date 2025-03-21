@@ -3,14 +3,12 @@ import jwt
 from .models import CustomUser
 from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication
-
-SECRET_KEY = "hello"
 from django.conf import settings
 
 def generate_jwt(user):
     timestamp = int(time.time()) + 60 * 60 * 24 * 7  # 1週間後
     encoded = jwt.encode(
-        {"login": "login","userid": user.pk, "username": user.username, "exp": timestamp},
+        {"login": settings.LOGIN_KEY,"userid": user.pk, "username": user.username, "exp": timestamp},
         settings.SECRET_KEY,
         algorithm="HS256"
     )
