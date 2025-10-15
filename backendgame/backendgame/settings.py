@@ -149,19 +149,15 @@ SECURE_SSL_REDIRECT = True
 CSRF_COOKIE_SECURE =  True
 SESSION_COOKIE_SECURE = True
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
+# CSRF や CORS では https:// を付ける必要がある
 CSRF_TRUSTED_ORIGINS = [
-    ALLOWED_HOSTS,
+    f"https://{host}" for host in ALLOWED_HOSTS if host
 ]
 
-# settings.pyに追加
 CORS_ALLOWED_ORIGINS = [
-    ALLOWED_HOSTS,
-]
-
-ALLOWED_HOSTS = [
-    ALLOWED_HOSTS, 
+    f"https://{host}" for host in ALLOWED_HOSTS if host
 ]
 
 CORS_ALLOW_CREDENTIALS = True
