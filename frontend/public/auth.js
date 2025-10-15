@@ -286,7 +286,8 @@ async function fetchTFAQRCode() {
 		const response = await fetch(apiBase + 'setup-tfa/', {
 			method: "GET",
 			headers: {
-				"Content-Type": "application/json"
+				"Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
 			},
 			credentials: 'include',
 		});
