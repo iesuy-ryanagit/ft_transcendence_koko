@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PING-PONG</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation">
+		<div class="container-fluid">
+			<span class="navbar-brand">PING-PONG</span>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="ナビゲーションの切り替え">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav ms-auto">
+					<li class="nav-item">
+						<a class="nav-link disabled" href="javascript:void(0);" id="nav-dashboard" onclick="navigateTo('dashboard')" role="button">
+							ダッシュボード
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link disabled" href="javascript:void(0);" id="nav-accessibility" onclick="navigateTo('accessibility-settings')" role="button">
+							アクセシビリティ
+						</a>
+					</li>				
+					<li class="nav-item">
+						<a class="nav-link disabled" href="#" id="nav-tfasign" onclick="showTFARegister()" role="button">2FA登録</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link disabled" href="#" id="nav-logout" onclick="logout()" role="button">ログアウト</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+	
+	
+
+    <div class="container mt-5" role="main">
+		<div id="accessibility-settings" class="page d-none">
+			<h2>アクセシビリティ設定</h2>
+			<section>
+				<h3>文字サイズ</h3>
+				<label for="font-size" class="form-label">サイズを選択:</label>
+				<select id="font-size" class="form-select">
+					<option value="small">小</option>
+					<option value="medium" selected>標準</option>
+					<option value="large">大</option>
+					<option value="xlarge">特大</option>
+				</select>
+			</section>
+
+			<section class="mt-3">
+				<h3>コントラスト</h3>
+				<label for="contrast-mode" class="form-label">テーマを選択:</label>
+				<select id="contrast-mode" class="form-select">
+					<option value="normal" selected>通常</option>
+					<option value="high-contrast">高コントラスト</option>
+					<option value="dark-mode">ダークモード</option>
+				</select>
+			</section>
+
+			<button class="btn btn-primary mt-3" id="save-settings">保存</button>
+			<button class="btn btn-secondary mt-2" onclick="navigateTo('dashboard')">戻る</button>
+		</div>
+		<!-- ゲーム画面 -->
+		<div id="game-screen" class="page d-none">
+			<h2>ピンポンゲーム</h2>
+			<div id="scoreboard" class="text-center my-2">Player 1: 0 | Player 2: 0</div>
+			<canvas id="pongCanvas" width="800" height="400" style="border: 2px solid black;"></canvas>
+		</div>
+
+		<div id="loginSelection" class="page" role="region" aria-labelledby="login-selection-title">
+			<h2>ログイン方式を選択</h2>
+			<button class="btn btn-primary w-100" onclick="navigateTo('login')">通常ログイン</button>
+			<button class="btn btn-warning w-100 mt-2" onclick="navigateTo('tfalogin')">2FAログイン</button>
+			<button class="btn btn-secondary w-100 mt-2" onclick="navigateTo('signup')">新規登録</button>
+            <button class="btn btn-secondary w-100 mt-2" onclick="Goto42Oauth()">42oauth-リンクへ</button> 
+            <button class="btn btn-secondary w-100 mt-2" onclick="loginWith42Oauth()">42oauth-ログイン</button>    
+		</div>
+
+        <!-- 2FAログイン画面 -->
+		<div id="tfalogin" class="page d-none" role="region" aria-labelledby="tfa-login-title">
+			<h2>2FAログイン</h2>
+			<input type="text" class="form-control auth-input" id="tfalogin-username" placeholder="ユーザー名">
+			<input type="text" class="form-control auth-input" id="tfalogin-password" placeholder="パスワード">
+			<input type="text" class="form-control auth-input mt-2" id="tfalogin-token" placeholder="認証コード">
+			<button class="btn btn-primary w-100" onclick="loginWith2FA()">ログイン</button>
+			<button class="btn btn-secondary w-100 mt-2" onclick="navigateTo('loginSelection')">戻る</button>
+		</div>
+
+        <!-- ログイン画面 -->
+        <div id="login" class="page d-none" role="region" aria-labelledby="login-title">
+            <h2>ログイン</h2>
+            <input type="text" class="form-control auth-input" id="login-username" placeholder="ユーザー名">
+            <input type="text" class="form-control auth-input" id="login-password" placeholder="パスワード">
+            <button class="btn btn-primary w-100" onclick="login_action()">ログイン</button>
+            <button class="btn btn-secondary w-100 mt-2" onclick="navigateTo('signup')">新規登録</button>
+        </div>
+
+        <!-- 新規登録画面 -->
+        <div id="signup" class="page d-none" role="region" aria-labelledby="signup-title">
+            <h2>新規登録</h2>
+            <input type="text" class="form-control auth-input" id="signup-username" placeholder="ユーザー名">
+            <input type="text" class="form-control auth-input" id="signup-password" placeholder="パスワード">
+            <button class="btn btn-primary w-100" onclick="signUp()">登録</button>
+            <button class="btn btn-secondary w-100 mt-2" onclick="navigateTo('loginSelection')">ログイン選択画面へ</button>
+        </div>
+
+        <!-- ダッシュボード -->
+		<div id="dashboard" class="page d-none" role="region" aria-labelledby="dashboard-title">
+			<h2>ダッシュボード</h2>
+			<button class="btn btn-primary" onclick="navigateTo('tournament-management')">トーナメント管理</button>
+			<button class="btn btn-warning" onclick="navigateTo('game-settings')">ゲーム設定を変更</button>
+		</div>
+
+		<!-- トーナメント管理画面 -->
+		<div id="tournament-management" class="page d-none" role="region" aria-labelledby="tournament-management-title">
+			<h2>トーナメント管理</h2>
+			<button class="btn btn-primary w-100 my-2" onclick="navigateTo('tournament-list')">トーナメント一覧</button>
+			<button class="btn btn-success w-100 my-2" onclick="navigateTo('create-tournament')">新規トーナメント作成</button>
+			<button class="btn btn-secondary w-100 my-2" onclick="navigateTo('dashboard')">戻る</button>
+		</div>
+
+		<!-- トーナメント一覧画面 -->
+		<div id="tournament-list" class="page d-none">
+			<h2>トーナメント一覧</h2>
+			<div id="tournament-list-container">
+				<p>読み込み中...</p>
+			</div>
+			<button class="btn btn-secondary w-100 my-2" onclick="navigateTo('tournament-management')">戻る</button>
+		</div>
+
+		<!-- モーダル -->
+		<div id="playerRegisterModal" class="modal">
+			<div class="modal-content">
+				<span class="close" onclick="closeModal()">&times;</span>
+				<h2>プレイヤー登録</h2>
+				<input type="text" id="playerNameInput" placeholder="プレイヤー名を入力">
+				<button class="btn btn-primary" onclick="submitPlayerRegistration()">登録</button>
+			</div>
+		</div>
+
+		<!--ゲーム設定画面-->
+		<div id="game-settings" class="page d-none">
+			<h2>ゲーム設定</h2>
+		
+			<label for="ball-speed" class="form-label">ボールのスピード:</label>
+			<input type="range" id="ball-speed" class="form-range" min="1" max="10" step="1">
+			<span id="ball-speed-value">5</span>
+			</br>
+			<button class="btn btn-primary" onclick="saveGameSettings()">保存</button>
+			<button class="btn btn-secondary" onclick="navigateTo('dashboard')">戻る</button>
+		</div>
+
+        <!-- トーナメント作成画面 -->
+        <div id="create-tournament" class="page d-none">
+            <h2>新規トーナメント作成</h2>
+            <input type="text" class="form-control my-2" id="tournament-name" placeholder="トーナメント名">
+			<!-- <input type="number" class="form-control my-2" id="tournament-size" placeholder="参加人数" min="2"> -->
+            <button class="btn btn-primary" onclick="createTournament()">作成</button>
+            <button class="btn btn-secondary" onclick="navigateTo('dashboard')">戻る</button>
+        </div>
+
+        <!-- 試合結果入力画面 -->
+        <div id="match-result" class="page d-none">
+            <h2>試合結果入力</h2>
+            <div id="match-list"></div>
+            <button class="btn btn-primary" onclick="saveResults()">保存</button>
+            <button class="btn btn-secondary" onclick="navigateTo('dashboard')">戻る</button>
+        </div>
+
+		<!--2FA登録画面-->
+		<div id="TFAregister" class="page d-none" role="region" aria-labelledby="tfa-register-title">
+			<h2>2FAの設定</h2>
+			<p>以下のQRコードをGoogle Authenticatorなどのアプリでスキャンしてください。</p>
+			<div id="tfa-qr-image" src="" alt="2FA QRコード" class="img-fluid"></div>
+			<p><strong>シークレットキー:</strong> <span id="tfa-secret-key"></span></p>
+            <button class="btn btn-primary w-100" onclick="setUpTfa()">2FA登録</button>
+			<button class="btn btn-secondary" onclick="navigateTo('dashboard')">戻る</button>
+		</div>
+    </div>
+
+	<div id="match-list-page" class="page d-none">
+		<h2>試合一覧</h2>
+	
+		<!-- ⚠ 注意文言 -->
+		<p style="color: red; font-weight: bold; text-align: center;">
+			⚠ 試合中はページのリロードやブラウザの「戻る」ボタンを押さないでください。<br>
+			試合情報が失われる可能性があります。
+		</p>
+	
+		<div id="match-list-container" class="list-group" aria-label="試合リスト">
+			<!-- ここに試合リストが動的に挿入される -->
+		</div>
+	</div>
+	
+    <script>
+    window.env = {
+        ACCOUNT_HOST: "https://ft-transcendence-koko.onrender.com/api/account",
+        TOURNAMENT_HOST: "https://tournament.example.com/",
+        GAME_HOST: "https://game.example.com/"
+    };
+    </script>
+    <script src="settings.js"></script>
+	<script src="auth.js"></script>
+	<script src="tournament.js"></script>
+	<script src="game.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</body>
+</html>
