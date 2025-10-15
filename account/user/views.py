@@ -7,6 +7,9 @@ from rest_framework.permissions import IsAuthenticated
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from .jwts import generate_jwt,JWTAuthentication
 import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SetupTFAView(views.APIView):
