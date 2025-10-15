@@ -96,10 +96,10 @@ async function loginWith2FA() {
         return; // 入力が不正なら処理を中断
     }
 
-    const csrfToken = getCookie('csrftoken');
+    
 	const response = await fetch(apiBase + 'login-tfa/', {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json','X-CSRFToken': csrfToken },
+		headers: { 'Content-Type': 'application/json'},
 		credentials: 'include',
 		body: JSON.stringify({ username, password, otp })
 	});
@@ -225,10 +225,12 @@ async function signUp() {
 
 	// セットアップ2FA処理
 async function setUpTfa() {
-
+    const csrfToken = getCookie('csrftoken');
 	const response = await fetch(apiBase + 'setup-tfa/', {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
+		headers: { 'Content-Type': 'application/json', 
+        'X-CSRFToken': csrfToken
+        },
 		credentials: 'include'  // 必要なら追加
 	});
 
