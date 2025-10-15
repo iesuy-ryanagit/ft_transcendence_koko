@@ -27,7 +27,8 @@
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${token}`
+				'Authorization': `Bearer ${token}`,
+                'X-CSRFToken': getCookie('csrftoken')
 			},
 			credentials: 'include',  // 必要なら追加
 			body: JSON.stringify({ball_speed, timer})

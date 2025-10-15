@@ -9,7 +9,7 @@ async function fetchTournaments() {
 
 	const response = await fetch(TournamentBase + 'tournament/list/', {
 		method: 'GET',
-		headers: { 'Authorization': 'Bearer ' + token },
+		headers: { 'Authorization': 'Bearer ' + token,'X-CSRFToken': csrfToken,},
         credentials: 'include'  // これでCookieが含まれる
 	});
 

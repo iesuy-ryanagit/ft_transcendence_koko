@@ -104,7 +104,17 @@ class LoginView(views.APIView):
                 secure=True,
                 httponly=True,
                 samesite=None,
-            )
+                )
+                # CSRFトークンを生成＆Cookieにセット
+                csrf_token = get_token(request)
+                response.set_cookie(
+                    key="csrftoken",
+                    value=csrf_token,
+                    max_age=86400,
+                    secure=True,
+                    httponly=False,
+                    samesite='None',
+                )
             return response
         else:
             return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
