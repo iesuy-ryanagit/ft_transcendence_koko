@@ -21,6 +21,10 @@ class JWTAuthentication(BaseAuthentication):
     def authenticate(self, request):
         try:
             token = request.COOKIES.get("jwt")
+
+            auth_header = request.headers.get('Authorization')
+            if auth_header and auth_header.startswith('Bearer '):
+                token = auth_header.split(' ')[1]
             if not token:
                 return None
 

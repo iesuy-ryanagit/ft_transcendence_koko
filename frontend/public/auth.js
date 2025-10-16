@@ -3,6 +3,18 @@ function validateInput(input) {
     return regex.test(input);
 }
 
+function getCookie(name) {
+    const cookies = document.cookie ? document.cookie.split('; ') : [];
+    for (let c of cookies) {
+        if (c.startsWith(name + '=')) {
+            return decodeURIComponent(c.split('=')[1]);
+        }
+    }
+    return null;
+}
+
+
+
 // ログイン処理
  async function login_action() {
     const username = document.getElementById('login-username').value;
@@ -83,9 +95,11 @@ async function loginWith2FA() {
         alert('入力は全て数字かアルファベットでならなければいけない');
         return; // 入力が不正なら処理を中断
     }
+
+    
 	const response = await fetch(apiBase + 'login-tfa/', {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
+		headers: { 'Content-Type': 'application/json'},
 		credentials: 'include',
 		body: JSON.stringify({ username, password, otp })
 	});
@@ -211,10 +225,12 @@ async function signUp() {
 
 	// セットアップ2FA処理
 async function setUpTfa() {
-
+    const csrfToken = getCookie('csrftoken');
 	const response = await fetch(apiBase + 'setup-tfa/', {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
+		headers: { 'Content-Type': 'application/json', 
+        'X-CSRFToken': csrfToken
+        },
 		credentials: 'include'  // 必要なら追加
 	});
 
@@ -270,8 +286,8 @@ async function fetchTFAQRCode() {
 		const response = await fetch(apiBase + 'setup-tfa/', {
 			method: "GET",
 			headers: {
-				"Authorization": `Bearer ${token}`, // 認証ヘッダーにJWTトークンを設定
-				"Content-Type": "application/json"
+				"Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
 			},
 			credentials: 'include',
 		});

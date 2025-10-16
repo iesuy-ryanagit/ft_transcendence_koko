@@ -1,6 +1,5 @@
 // game.js
  let gameLoopId = requestAnimationFrame(gameLoop);
- let renderLoopId = requestAnimationFrame(renderLoop);
  let fetchGameStateInterval; // ゲーム状態取得ループを制御するID
  let now_matches;
  function validateInput3(input) {
@@ -9,6 +8,9 @@
  }
  let player1_alias;
  let player2_alias;
+ let lastPaddleUpdate = 0;
+
+// ゲーム設定保存
 
  async function saveGameSettings() {
 	const ball_speed = document.getElementById('ball-speed').value;
@@ -27,7 +29,8 @@
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${token}`
+				'Authorization': `Bearer ${token}`,
+                'X-CSRFToken': getCookie('csrftoken')
 			},
 			credentials: 'include',  // 必要なら追加
 			body: JSON.stringify({ball_speed, timer})
@@ -164,11 +167,15 @@ function submitPlayerRegistration() {
 		return;
 	}
 
-	fetch(TournamentBase + `tournament/join/`, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ tournament_id: selectedTournamentId, alias })
-	})
+    const token = localStorage.getItem('access_token');
+    fetch(TournamentBase + `tournament/join/`, {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ tournament_id: selectedTournamentId, alias })
+    })
 	.then(response => {
 		if (!response.ok) {
 			// JSONに変換してからエラーメッセージ抽出
@@ -240,10 +247,11 @@ try {
 		timer: gameSettings.timer
 	};
 	console.log("ゲーム設定:", settings);
-
+    const token = localStorage.getItem('access_token');
+    if (!token) throw new Error("認証トークンがありません。ログインしてください。");
 	const response = await fetch(GameBase + 'pong/start/', {
 		method: "POST",
-		headers: { 'Content-Type': 'application/json' },
+		headers: { 'Content-Type': 'application/json','Authorization': `Bearer ${token}`},
 		credentials: 'include',
 		body: JSON.stringify({
 			match_id: _matchId,
@@ -259,7 +267,7 @@ try {
 
 	const tournamentResponse = await fetch(`${TournamentBase}tournament/${selectedTournamentId}`, {
 		method: "GET",
-		headers: { 'Content-Type': 'application/json' }
+		headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
 	});
 	if (!tournamentResponse.ok) throw new Error(`トーナメント情報の取得に失敗: ${tournamentResponse.statusText}`);
 	
@@ -276,8 +284,7 @@ try {
 
 	isGameEnded = false; // 試合中フラグON
 	gameLoopId = requestAnimationFrame(gameLoop);
-	renderLoopId = requestAnimationFrame(renderLoop);
-	fetchGameStateInterval = setInterval(fetchGameState, 200);
+	fetchGameStateInterval = setInterval(fetchGameState, 500);
 
 } catch (error) {
 	console.error("試合開始エラー:", error);
@@ -288,6 +295,7 @@ try {
 
 // パドルの位置をAPIに送信
 async function updatePaddlePosition() {
+    const token = localStorage.getItem('access_token');
 	if (!matchId) return;
 
 	// プレイヤー1（W / S キーで操作）
@@ -310,7 +318,7 @@ async function updatePaddlePosition() {
 	try {
 		const response = await fetch(`${GameBase}pong/data/`, {
 			method: "PATCH",
-			headers: { "Content-Type": "application/json" },
+			headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
 			body: JSON.stringify({
 				match_id: matchId,
 				paddles: {
@@ -336,10 +344,11 @@ async function fetchGameState() {
     if (!matchId || isFetching) return;
     isFetching = true;
 
+    const token = localStorage.getItem('access_token');
     try {
         const response = await fetch(`${GameBase}pong/data/?match_id=${matchId}`, {
             method: "GET",
-            headers: { "Content-Type": "application/json" }
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         });
 
         if (response.ok) {
@@ -406,13 +415,14 @@ function drawGame() {
 }
 
 function gameLoop() {
-	updatePaddlePosition();  // キー入力を反映
-	gameLoopId = requestAnimationFrame(gameLoop);  // 次のフレームを描画
-}
+    // 1. パドル位置更新
+    updatePaddlePosition();
 
-function renderLoop() {
-	drawGame();  // 常に最新の gameState を描画
-	renderLoopId = requestAnimationFrame(renderLoop);  // 次のフレームを描画
+    // 2. 描画
+    drawGame();
+
+    // 3. 次フレーム
+    gameLoopId = requestAnimationFrame(gameLoop);
 }
 
 
@@ -425,12 +435,15 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 
 	console.log("送信データ:", body); // 確認用ログ
 
+    const token = localStorage.getItem('access_token');
+
 	try {
 		// ① 試合結果送信
 		const response = await fetch(`${TournamentBase}tournament/match/end/`, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
 			},
 			body: JSON.stringify(body)
 		});
@@ -451,6 +464,7 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 
 			// トーナメントIDを取得 (事前に定義されていることが前提)
 			const tournamentId = selectedTournamentId; // 例えばグローバル変数から参照
+            const token = localStorage.getItem('access_token');
 
 			if (!tournamentId) {
 				console.error("トーナメントIDが未設定です。");
@@ -460,7 +474,7 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 			// ③ トーナメント試合リストAPI呼び出し
 			const matchesResponse = await fetch(`${TournamentBase}tournament/${tournamentId}/`, {
 				method: 'GET',
-				headers: { 'Content-Type': 'application/json' }
+				headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
 			});
 
 			if (!matchesResponse.ok) {
@@ -513,6 +527,7 @@ try {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
 		},
 		body: JSON.stringify({ tournament_id: tournamentId })
 	});
@@ -579,10 +594,6 @@ function stopGameLoop() {
         cancelAnimationFrame(gameLoopId);
         gameLoopId = null;
     }
-    if (renderLoopId) {
-        cancelAnimationFrame(renderLoopId);
-        renderLoopId = null;
-    }
     if (fetchGameStateInterval) {
         clearInterval(fetchGameStateInterval);
         fetchGameStateInterval = null;
@@ -605,3 +616,15 @@ switch (status) {
 }
 }
 
+window.startMatch = startMatch;
+window.stopGameLoop = stopGameLoop;
+window.navigateTo = navigateTo;
+window.enableNavigation = enableNavigation;
+window.loadGameSettings = loadGameSettings;
+window.startTournament = startTournament;
+window.registerPlayer = registerPlayer;
+window.closeModal = closeModal;
+window.submitPlayerRegistration = submitPlayerRegistration;
+window.viewMatches = viewMatches;
+window.displayMatches = displayMatches;
+window.saveGameSettings = saveGameSettings;

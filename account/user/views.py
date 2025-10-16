@@ -7,6 +7,9 @@ from rest_framework.permissions import IsAuthenticated
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from .jwts import generate_jwt,JWTAuthentication
 import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SetupTFAView(views.APIView):
@@ -81,6 +84,7 @@ class SignupView(views.APIView):
         if serializer.is_valid():
             user = serializer.save()
             return Response({'status': 'success'}, status=status.HTTP_201_CREATED)
+        logger.warning(f"Signup validation errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(views.APIView):
@@ -100,7 +104,7 @@ class LoginView(views.APIView):
                 secure=True,
                 httponly=True,
                 samesite=None,
-            )
+                )
             return response
         else:
             return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
