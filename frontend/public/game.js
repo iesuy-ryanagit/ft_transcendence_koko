@@ -265,7 +265,7 @@ try {
 
 	const tournamentResponse = await fetch(`${TournamentBase}tournament/${selectedTournamentId}`, {
 		method: "GET",
-		headers: { 'Content-Type': 'application/json' }
+		headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
 	});
 	if (!tournamentResponse.ok) throw new Error(`トーナメント情報の取得に失敗: ${tournamentResponse.statusText}`);
 	
@@ -294,6 +294,7 @@ try {
 
 // パドルの位置をAPIに送信
 async function updatePaddlePosition() {
+    const token = localStorage.getItem('access_token');
 	if (!matchId) return;
 
 	// プレイヤー1（W / S キーで操作）
@@ -316,7 +317,7 @@ async function updatePaddlePosition() {
 	try {
 		const response = await fetch(`${GameBase}pong/data/`, {
 			method: "PATCH",
-			headers: { "Content-Type": "application/json" },
+			headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
 			body: JSON.stringify({
 				match_id: matchId,
 				paddles: {
@@ -342,10 +343,11 @@ async function fetchGameState() {
     if (!matchId || isFetching) return;
     isFetching = true;
 
+    const token = localStorage.getItem('access_token');
     try {
         const response = await fetch(`${GameBase}pong/data/?match_id=${matchId}`, {
             method: "GET",
-            headers: { "Content-Type": "application/json" }
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         });
 
         if (response.ok) {
@@ -432,7 +434,7 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 	console.log("送信データ:", body); // 確認用ログ
 
     const token = localStorage.getItem('access_token');
-    
+
 	try {
 		// ① 試合結果送信
 		const response = await fetch(`${TournamentBase}tournament/match/end/`, {
