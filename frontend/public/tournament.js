@@ -9,7 +9,7 @@ async function fetchTournaments() {
 
 	const response = await fetch(TournamentBase + 'tournament/list/', {
 		method: 'GET',
-		headers: { 'Authorization': 'Bearer ' + token,'X-CSRFToken': csrfToken,},
+		headers: { 'Authorization': 'Bearer ' + token },
         credentials: 'include'  // これでCookieが含まれる
 	});
 
@@ -59,33 +59,49 @@ async function createTournament() {
 	}
 }
 
-function loadTournamentList() {
-	const container = document.getElementById("tournament-list-container");
-	container.innerHTML = "<p>読み込み中...</p>";
+async function loadTournamentList() {
+    const container = document.getElementById("tournament-list-container");
+    container.innerHTML = "<p>読み込み中...</p>";
 
-	fetch(TournamentBase + 'tournament/list')
-		.then(response => response.json())
-		.then(data => {
-			console.log(data);
-			if (data.length === 0) {
-				container.innerHTML = "<p>トーナメントがありません。</p>";
-				return;
-			}
-			container.innerHTML = data.map(tournament => `
-				<div class="card my-2">
-					<div class="card-body">
-						<h5 class="card-title">${tournament.name}</h5>
-						<button class="btn btn-success" onclick="registerPlayer('${tournament.id}')">プレイヤー登録</button>
-						<button class="btn btn-warning" onclick="startTournament('${tournament.id}')"
-							${tournament.status === 'ongoing' ? 'disabled' : ''}>
-							試合開始
-						</button>
-					</div>
-				</div>
-			`).join("");
-		})
-		.catch(error => {
-			console.error("トーナメント一覧の取得に失敗:", error);
-			container.innerHTML = "<p>データを取得できませんでした。</p>";
-		});
+    const token = localStorage.getItem('access_token'); // ← ここでトークン取得
+
+    try {
+        const response = await fetch(TournamentBase + 'tournament/list/', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'  // 必要ならCookieも送る
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error('トーナメント一覧取得失敗');
+        }
+
+        if (data.length === 0) {
+            container.innerHTML = "<p>トーナメントがありません。</p>";
+            return;
+        }
+
+        // カードを作る
+        container.innerHTML = data.map(tournament => `
+            <div class="card my-2">
+                <div class="card-body">
+                    <h5 class="card-title">${tournament.name}</h5>
+                    <button class="btn btn-success" onclick="registerPlayer('${tournament.id}')">プレイヤー登録</button>
+                    <button class="btn btn-warning" onclick="startTournament('${tournament.id}')"
+                        ${tournament.status === 'ongoing' ? 'disabled' : ''}>
+                        試合開始
+                    </button>
+                </div>
+            </div>
+        `).join("");
+
+    } catch (error) {
+        console.error("トーナメント一覧の取得に失敗:", error);
+        container.innerHTML = "<p>データを取得できませんでした。</p>";
+    }
 }
