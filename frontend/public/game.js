@@ -165,11 +165,15 @@ function submitPlayerRegistration() {
 		return;
 	}
 
-	fetch(TournamentBase + `tournament/join/`, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ tournament_id: selectedTournamentId, alias })
-	})
+    const token = localStorage.getItem('access_token');
+    fetch(TournamentBase + `tournament/join/`, {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ tournament_id: selectedTournamentId, alias })
+    })
 	.then(response => {
 		if (!response.ok) {
 			// JSONに変換してからエラーメッセージ抽出
@@ -241,10 +245,11 @@ try {
 		timer: gameSettings.timer
 	};
 	console.log("ゲーム設定:", settings);
-
+    const token = localStorage.getItem('access_token');
+    if (!token) throw new Error("認証トークンがありません。ログインしてください。");
 	const response = await fetch(GameBase + 'pong/start/', {
 		method: "POST",
-		headers: { 'Content-Type': 'application/json' },
+		headers: { 'Content-Type': 'application/json','Authorization': `Bearer ${token}`},
 		credentials: 'include',
 		body: JSON.stringify({
 			match_id: _matchId,
@@ -426,12 +431,15 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 
 	console.log("送信データ:", body); // 確認用ログ
 
+    const token = localStorage.getItem('access_token');
+    
 	try {
 		// ① 試合結果送信
 		const response = await fetch(`${TournamentBase}tournament/match/end/`, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
 			},
 			body: JSON.stringify(body)
 		});
@@ -514,6 +522,7 @@ try {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
 		},
 		body: JSON.stringify({ tournament_id: tournamentId })
 	});
