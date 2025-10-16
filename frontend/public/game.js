@@ -284,7 +284,7 @@ try {
 
 	isGameEnded = false; // 試合中フラグON
 	gameLoopId = requestAnimationFrame(gameLoop);
-	fetchGameStateInterval = setInterval(fetchGameState, 200);
+	fetchGameStateInterval = setInterval(fetchGameState, 500);
 
 } catch (error) {
 	console.error("試合開始エラー:", error);
