@@ -314,12 +314,7 @@ async function updatePaddlePosition() {
 			})
 		});
 
-		if (!response.ok) {
-			throw new Error(`パドル位置の更新に失敗: ${response.statusText}`);
-		}
-
 	} catch (error) {
-		console.error("パドル位置更新エラー:", error);
 	}
 }
 
