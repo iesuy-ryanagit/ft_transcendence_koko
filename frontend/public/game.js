@@ -620,4 +620,4 @@ switch (status) {
 }
 
 
-export { startMatch, stopGameLoop, navigateTo, enableNavigation, loadGameSettings };
+export { startMatch, stopGameLoop, navigateTo, enableNavigation, loadGameSettings,startTournament, registerPlayer, closeModal, submitPlayerRegistration, viewMatches, displayMatches, saveGameSettings };
