@@ -21,8 +21,6 @@
 		alert('認証トークンがありません。ログインし直してください。');
 		return;
 	}
-
-	console.log('Sending request to:', apiBase + 'setup-game/');
 	
 	try {
 		const response = await fetch(apiBase + 'setup-game/', {
@@ -36,10 +34,8 @@
 			body: JSON.stringify({ball_speed, timer})
 		});
 
-		console.log('Status:', response.status);
 		
 		const text = await response.text();
-		console.log('Response Text:', text);
 
 		try {
 			const data = JSON.parse(text); // JSONパース
@@ -74,18 +70,15 @@
 			credentials: 'include'
 		});
 
-		console.log("API Response Status:", response.status); // ステータスコードを確認
 
 		if (!response.ok) {
 			throw new Error(`設定の取得に失敗: ${response.statusText}`);
 		}
 
 		const data = await response.json();
-		console.log("取得したデータ:", data); // 取得したデータを確認
 
 		// `ballSpeed` や `timer` が存在しない場合のエラーチェック
 		if (!data || data.ball_speed === undefined) {
-			console.log(data.ball_speed)
 			throw new Error("APIレスポンスに必要なデータがありません");
 		}
 
@@ -101,10 +94,8 @@
 		ballSpeedInput.value = data.ballSpeed;
 		ballSpeedValue.textContent = data.ballSpeed;
 
-		console.log("ゲーム設定を更新しました");
 		return data; // 取得したデータを返す
 	} catch (error) {
-		console.error('設定の取得エラー:', error);
 		alert('ゲーム設定の取得に失敗しました');
 		return null;
 	}
@@ -127,7 +118,6 @@
 		}
 
 		const data = await response.json();
-		console.log('試合一覧:', data);
 
 		// 例: 試合データを描画
 		displayMatches(data.matches);
@@ -142,7 +132,6 @@
 // モーダルを開く
  function registerPlayer(tournamentId) {
 	selectedTournamentId = tournamentId;
-	console.log(selectedTournamentId);
 	document.getElementById("playerRegisterModal").style.display = "block";
 }
 
@@ -187,7 +176,6 @@ function submitPlayerRegistration() {
 		return response.json();
 	})
 	.then(data => {
-		console.log(data);
 		alert("プレイヤーが登録されました！");
 		closeModal();  // 登録後にモーダルを閉じる
 	})
@@ -246,7 +234,6 @@ try {
 		ball_speed: gameSettings.ball_speed,
 		timer: gameSettings.timer
 	};
-	console.log("ゲーム設定:", settings);
     const token = localStorage.getItem('access_token');
     if (!token) throw new Error("認証トークンがありません。ログインしてください。");
 	const response = await fetch(GameBase + 'pong/start/', {
@@ -263,7 +250,6 @@ try {
 	
 	const data = await response.json();
 	matchId = data.match_id;
-	console.log(`試合ID: ${matchId}`);
 
 	const tournamentResponse = await fetch(`${TournamentBase}tournament/${selectedTournamentId}`, {
 		method: "GET",
@@ -278,7 +264,6 @@ try {
 	player1_id = targetMatch.player1.id;
 	player2_id = targetMatch.player2.id;
 	now_matches = tournamentData.matches;
-	console.log(`Player1 ID: ${player1_id}, Player2 ID: ${player2_id}`);
 
 	navigateTo("game-screen");
 
@@ -395,7 +380,6 @@ function drawGame() {
 	// 試合終了処理 (一度だけ実行)
 	// drawGame内の試合終了処理
 	if (gameState.match_end && !isGameEnded) {
-		console.log("試合終了処理開始");
 
 		isGameEnded = true; // 一度だけ実行
 
@@ -433,7 +417,6 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 		winner: Number(winnerId)           // 数値として
 	};
 
-	console.log("送信データ:", body); // 確認用ログ
 
     const token = localStorage.getItem('access_token');
 
@@ -449,7 +432,6 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 		});
 
 		const responseText = await response.text(); // レスポンス確認用
-		console.log("サーバーレスポンス:", responseText);
 
 		if (!response.ok) {
 			console.error("エラー詳細:", responseText);
@@ -460,7 +442,6 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 
 		// ② next_round が pending なら試合リスト取得
 		if (data.next_round && data.next_round.status === 'next_round_pending') {
-			console.log('次ラウンド保留中: 最新試合一覧を取得します');
 
 			// トーナメントIDを取得 (事前に定義されていることが前提)
 			const tournamentId = selectedTournamentId; // 例えばグローバル変数から参照
@@ -482,7 +463,6 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 			}
 
 			const matchesData = await matchesResponse.json();
-			console.log('最新の試合データ:', matchesData);
 
 			// ④ 試合リスト表示
 			displayMatches(matchesData.matches); // displayMatches関数へ渡す
@@ -539,7 +519,6 @@ try {
 		return;
 	}
 
-	console.log('試合データ:', data.matches);
 	selectedTournamentId = tournamentId;
 	displayMatches(data.matches);
 	navigateTo('match-list-page');
@@ -598,7 +577,6 @@ function stopGameLoop() {
         clearInterval(fetchGameStateInterval);
         fetchGameStateInterval = null;
     }
-    console.log("ゲームループ停止完了");
 }
 
 

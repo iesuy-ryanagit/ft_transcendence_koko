@@ -72,8 +72,6 @@ async function fetchUserProfile() {
         localStorage.setItem('email', data.email);
         localStorage.setItem('opt', data.otp_enabled);
 
-        console.log('プロフィール情報:', data);
-
     } catch (error) {
         console.error('プロフィール取得エラー:', error);
     }
@@ -244,7 +242,6 @@ async function setUpTfa() {
 
 // ログアウト処理
 async function logout() {
-    console.log("ログアウト処理開始");
 	const response = await fetch(apiBase + 'logout/', {
 		method: 'GET',
 		headers: { 'Content-Type': 'application/json' },
@@ -268,7 +265,6 @@ async function logout() {
 
     // `history.replaceState()` を使用して履歴を書き換え
     history.replaceState({}, '', '#loginSelection');
-    console.log("履歴を置換: loginSelection");
 
     // 画面を遷移
     navigateTo('loginSelection', false);
@@ -298,7 +294,6 @@ async function fetchTFAQRCode() {
 		}
 
 		const data = await response.json();
-		console.log("APIレスポンス:", data);
 		displayQRCode(data.qr_url, data.secret_key);
 
 	} catch (error) {
@@ -314,7 +309,6 @@ async function sendTFAExitRequest() {
 	}
 
 	try {
-		console.log("2FA終了リクエスト送信中...");
 
 		const response = await fetch(apiBase + 'setup-tfa/',  {
 			method: "POST",
@@ -326,14 +320,11 @@ async function sendTFAExitRequest() {
 			body: JSON.stringify({ action: "exit_2fa" }) 
 		});
 
-		console.log("APIレスポンス:", response);
-
 		if (!response.ok) {
 			const errorData = await response.json();
 			throw new Error(errorData.message || "APIリクエストに失敗しました");
 		}
 
-		console.log("2FA終了リクエスト送信成功");
 	} catch (error) {
 		console.error("エラー:", error);
 	}
@@ -347,9 +338,7 @@ async function showTFARegister(addHistory = true) {
 	const observer = new MutationObserver((mutations, obs) => {
 		const backButton = document.querySelector("#TFAregister .btn-secondary");
 		if (backButton && !document.getElementById('TFAregister').classList.contains('d-none')) {
-			console.log("戻るボタンが見つかりました");
 			backButton.addEventListener("click", async function () {
-				console.log("戻るボタンクリック: 2FA終了リクエストを送信");
 				await sendTFAExitRequest();
 				navigateTo("dashboard");
 			});
@@ -362,7 +351,6 @@ async function showTFARegister(addHistory = true) {
 
 
 function displayQRCode(otpAuthUrl, secretKey) {
-	console.log("OTP Auth URL:", otpAuthUrl); // デバッグ用
 	
 	document.getElementById("tfa-secret-key").textContent = secretKey;
 	document.getElementById("TFAregister").classList.remove("d-none");

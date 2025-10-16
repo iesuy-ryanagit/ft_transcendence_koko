@@ -39,7 +39,6 @@ let isGameEnded = false; // 試合が終了したかどうか
 		if (page === 'tournament-list') {
 			loadTournamentList();
 		}
-		console.log('Popstate triggered, navigating to:', page);
 	
 		navigateTo(page, false);
 	});
@@ -53,26 +52,18 @@ let isGameEnded = false; // 試合が終了したかどうか
 
 	// 画面遷移関数
 	 function navigateTo(page, addHistory = true) {
-		console.log("Navigating to:", page);
 	
 		if (!document.getElementById(page)) {
 			console.error(`Page not found: ${page}`);
 			return;
 		}
 	
-		// if (location.hash === `#${page}`) {
-		// 	console.log("Same page, skipping pushState");
-		// 	return;
-		// }
-	
 		document.querySelectorAll('.page').forEach(p => p.classList.add('d-none'));
 	
 		document.getElementById(page).classList.remove('d-none');
-		console.log(`Showing page: ${page}`);
 	
 		// 🔹 ここでトーナメントリストをロード
 		if (page === 'tournament-list') {
-			console.log("Loading tournament list...");
 			loadTournamentList();
 		}
 	
