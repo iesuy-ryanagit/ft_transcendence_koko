@@ -28,7 +28,6 @@
 			headers: {
 				'Content-Type': 'application/json',
 				'Authorization': `Bearer ${token}`,
-                'X-CSRFToken': getCookie('csrftoken')
 			},
 			credentials: 'include',  // 必要なら追加
 			body: JSON.stringify({ball_speed, timer})
@@ -462,6 +461,7 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 
 			// トーナメントIDを取得 (事前に定義されていることが前提)
 			const tournamentId = selectedTournamentId; // 例えばグローバル変数から参照
+            const token = localStorage.getItem('access_token');
 
 			if (!tournamentId) {
 				console.error("トーナメントIDが未設定です。");
@@ -471,7 +471,7 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 			// ③ トーナメント試合リストAPI呼び出し
 			const matchesResponse = await fetch(`${TournamentBase}tournament/${tournamentId}/`, {
 				method: 'GET',
-				headers: { 'Content-Type': 'application/json' }
+				headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
 			});
 
 			if (!matchesResponse.ok) {
