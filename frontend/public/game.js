@@ -1,6 +1,5 @@
 // game.js
  let gameLoopId = requestAnimationFrame(gameLoop);
- let renderLoopId = requestAnimationFrame(renderLoop);
  let fetchGameStateInterval; // ゲーム状態取得ループを制御するID
  let now_matches;
  function validateInput3(input) {
@@ -10,6 +9,8 @@
  let player1_alias;
  let player2_alias;
  let lastPaddleUpdate = 0;
+
+// ゲーム設定保存
 
  async function saveGameSettings() {
 	const ball_speed = document.getElementById('ball-speed').value;
@@ -283,7 +284,6 @@ try {
 
 	isGameEnded = false; // 試合中フラグON
 	gameLoopId = requestAnimationFrame(gameLoop);
-	renderLoopId = requestAnimationFrame(renderLoop);
 	fetchGameStateInterval = setInterval(fetchGameState, 200);
 
 } catch (error) {
@@ -415,13 +415,14 @@ function drawGame() {
 }
 
 function gameLoop() {
-	updatePaddlePosition();  // キー入力を反映
-	gameLoopId = requestAnimationFrame(gameLoop);  // 次のフレームを描画
-}
+    // 1. パドル位置更新
+    updatePaddlePosition();
 
-function renderLoop() {
-	drawGame();  // 常に最新の gameState を描画
-	renderLoopId = requestAnimationFrame(renderLoop);  // 次のフレームを描画
+    // 2. 描画
+    drawGame();
+
+    // 3. 次フレーム
+    gameLoopId = requestAnimationFrame(gameLoop);
 }
 
 
@@ -592,10 +593,6 @@ function stopGameLoop() {
     if (gameLoopId) {
         cancelAnimationFrame(gameLoopId);
         gameLoopId = null;
-    }
-    if (renderLoopId) {
-        cancelAnimationFrame(renderLoopId);
-        renderLoopId = null;
     }
     if (fetchGameStateInterval) {
         clearInterval(fetchGameStateInterval);
