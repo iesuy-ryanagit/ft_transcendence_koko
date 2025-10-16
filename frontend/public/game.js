@@ -619,5 +619,15 @@ switch (status) {
 }
 }
 
-
-export { startMatch, stopGameLoop, navigateTo, enableNavigation, loadGameSettings,startTournament, registerPlayer, closeModal, submitPlayerRegistration, viewMatches, displayMatches, saveGameSettings };
+window.startMatch = startMatch;
+window.stopGameLoop = stopGameLoop;
+window.navigateTo = navigateTo;
+window.enableNavigation = enableNavigation;
+window.loadGameSettings = loadGameSettings;
+window.startTournament = startTournament;
+window.registerPlayer = registerPlayer;
+window.closeModal = closeModal;
+window.submitPlayerRegistration = submitPlayerRegistration;
+window.viewMatches = viewMatches;
+window.displayMatches = displayMatches;
+window.saveGameSettings = saveGameSettings;
