@@ -134,8 +134,8 @@ let isGameEnded = false; // 試合が終了したかどうか
 			loadGameSettings();
 		}
 	
-		const token = localStorage.getItem('access_token');
-		enableNavigation(!!token);
+		// Removed: localStorage.getItem('access_token');
+		// enableNavigation(!!token);
 	
 		// 初回ロード時にURLの `#` に応じて画面を表示
 		const page = location.hash.replace('#', '') || 'loginSelection';

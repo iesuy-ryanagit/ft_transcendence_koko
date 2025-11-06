@@ -144,13 +144,13 @@ function submitPlayerRegistration() {
 		return;
 	}
 
-    const token = localStorage.getItem('access_token');
+	// Removed: localStorage.getItem('access_token');
     fetch(TournamentBase + `tournament/join/`, {
         method: "POST",
         headers: { 
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
         },
+        credentials: 'include',
         body: JSON.stringify({ tournament_id: selectedTournamentId, alias })
     })
 	.then(response => {
@@ -222,11 +222,10 @@ try {
 		ball_speed: gameSettings.ball_speed,
 		timer: gameSettings.timer
 	};
-    const token = localStorage.getItem('access_token');
-    if (!token) throw new Error("認証トークンがありません。ログインしてください。");
+	// Removed: localStorage.getItem('access_token');
 	const response = await fetch(GameBase + 'pong/start/', {
 		method: "POST",
-		headers: { 'Content-Type': 'application/json','Authorization': `Bearer ${token}`},
+		headers: { 'Content-Type': 'application/json'},
 		credentials: 'include',
 		body: JSON.stringify({
 			match_id: _matchId,
@@ -428,7 +427,7 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 
 			// トーナメントIDを取得 (事前に定義されていることが前提)
 			const tournamentId = selectedTournamentId; // 例えばグローバル変数から参照
-            const token = localStorage.getItem('access_token');
+			// Removed: localStorage.getItem('access_token');
 
 			if (!tournamentId) {
 				console.error("トーナメントIDが未設定です。");
@@ -438,7 +437,7 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 			// ③ トーナメント試合リストAPI呼び出し
 			const matchesResponse = await fetch(`${TournamentBase}tournament/${tournamentId}/`, {
 				method: 'GET',
-				headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+				headers: { 'Content-Type': 'application/json'}
 			});
 
 			if (!matchesResponse.ok) {
