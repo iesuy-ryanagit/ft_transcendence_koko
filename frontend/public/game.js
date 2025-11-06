@@ -13,24 +13,17 @@
 // ゲーム設定保存
 
  async function saveGameSettings() {
-	const ball_speed = document.getElementById('ball-speed').value;
-	const timer = 60;
-	const token = localStorage.getItem('access_token'); // 認証トークン
+ 	const ball_speed = document.getElementById('ball-speed').value;
+ 	const timer = 60;
 
-	if (!token) {
-		alert('認証トークンがありません。ログインし直してください。');
-		return;
-	}
-	
 	try {
 		const response = await fetch(apiBase + 'setup-game/', {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${token}`,
-                'X-CSRFToken': getCookie('csrftoken')
+				'X-CSRFToken': getCookie('csrftoken')
 			},
-			credentials: 'include',  // 必要なら追加
+			credentials: 'include',
 			body: JSON.stringify({ball_speed, timer})
 		});
 
@@ -57,18 +50,14 @@
 
 
  async function loadGameSettings() {
-	const token = localStorage.getItem('access_token'); // 認証トークン
-    if (!token)
-        return ;
-	try {
-		const response = await fetch(apiBase + 'setup-game/', {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${token}`
-			},
-			credentials: 'include'
-		});
+    try {
+ 		const response = await fetch(apiBase + 'setup-game/', {
+ 			method: 'GET',
+ 			headers: {
+ 				'Content-Type': 'application/json'
+ 			},
+ 			credentials: 'include'
+ 		});
 
 
 		if (!response.ok) {
@@ -102,16 +91,15 @@
 }
 
  async function viewMatches(tournamentId) {
-	try {
-		const token = localStorage.getItem('access_token');
+ 	try {
 
-		const response = await fetch(`${TournamentBase}tournament/${tournamentId}`, {
-			method: 'GET',
-			headers: {
-				'Authorization': `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			}
-		});
+ 		const response = await fetch(`${TournamentBase}tournament/${tournamentId}`, {
+ 			method: 'GET',
+ 			headers: {
+ 				'Content-Type': 'application/json'
+ 			},
+ 			credentials: 'include'
+ 		});
 
 		if (!response.ok) {
 			throw new Error('試合一覧の取得に失敗しました');
@@ -251,10 +239,11 @@ try {
 	const data = await response.json();
 	matchId = data.match_id;
 
-	const tournamentResponse = await fetch(`${TournamentBase}tournament/${selectedTournamentId}`, {
-		method: "GET",
-		headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
-	});
+			const tournamentResponse = await fetch(`${TournamentBase}tournament/${selectedTournamentId}`, {
+				method: "GET",
+				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include'
+			});
 	if (!tournamentResponse.ok) throw new Error(`トーナメント情報の取得に失敗: ${tournamentResponse.statusText}`);
 	
 	const tournamentData = await tournamentResponse.json();
@@ -280,7 +269,7 @@ try {
 
 // パドルの位置をAPIに送信
 async function updatePaddlePosition() {
-    const token = localStorage.getItem('access_token');
+	// auth handled by httpOnly cookie; no client-side token read
 	if (!matchId) return;
 
 	// プレイヤー1（W / S キーで操作）
@@ -303,7 +292,8 @@ async function updatePaddlePosition() {
 	try {
 		const response = await fetch(`${GameBase}pong/data/`, {
 			method: "PATCH",
-			headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+			headers: { "Content-Type": "application/json" },
+			credentials: 'include',
 			body: JSON.stringify({
 				match_id: matchId,
 				paddles: {
@@ -324,12 +314,12 @@ async function fetchGameState() {
     if (!matchId || isFetching) return;
     isFetching = true;
 
-    const token = localStorage.getItem('access_token');
-    try {
-        const response = await fetch(`${GameBase}pong/data/?match_id=${matchId}`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        });
+	try {
+		const response = await fetch(`${GameBase}pong/data/?match_id=${matchId}`, {
+			method: "GET",
+			headers: { "Content-Type": "application/json" },
+			credentials: 'include'
+		});
 
         if (response.ok) {
             const data = await response.json();
@@ -413,16 +403,14 @@ async function submitMatchResult(matchId, finalScore, winnerId) {
 	};
 
 
-    const token = localStorage.getItem('access_token');
-
 	try {
 		// ① 試合結果送信
 		const response = await fetch(`${TournamentBase}tournament/match/end/`, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+				'Content-Type': 'application/json'
 			},
+			credentials: 'include',
 			body: JSON.stringify(body)
 		});
 
@@ -491,21 +479,16 @@ if (!tournamentId) {
 	return;
 }
 
-const token = localStorage.getItem('access_token');
-if (!token) {
-	alert('ログインしてください');
-	return;
-}
 
 try {
-	const response = await fetch(`${TournamentBase}tournament/start/`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-		},
-		body: JSON.stringify({ tournament_id: tournamentId })
-	});
+ 	const response = await fetch(`${TournamentBase}tournament/start/`, {
+ 		method: 'POST',
+ 		headers: {
+ 			'Content-Type': 'application/json'
+ 		},
+ 		credentials: 'include',
+ 		body: JSON.stringify({ tournament_id: tournamentId })
+ 	});
 
 	const data = await response.json(); // 先にJSONを読む（エラーでも読めるように)	
 	if (!response.ok) {

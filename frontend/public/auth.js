@@ -13,6 +13,10 @@ function getCookie(name) {
     return null;
 }
 
+// In-memory token manager: stores JWT only in memory (cleared on reload)
+// NOTE: token handling is now delegated to httpOnly cookies set by the server.
+// Client will not store or read JWTs in JS to reduce XSS risk.
+
 
 
 // ログイン処理
@@ -35,11 +39,10 @@ function getCookie(name) {
     });
 
     const data = await response.json();
-    if (response.ok) {
-        localStorage.setItem('access_token', data.jwt);
-        localStorage.setItem('username', username);
-        document.cookie = `jwt=${data.jwt}; path=/; max-age=86400; SameSite=Lax`;
-        await fetchUserProfile();
+	if (response.ok) {
+		// Server sets httpOnly cookie for auth; do not store token in JS
+		localStorage.setItem('username', username);
+		await fetchUserProfile();
         enableNavigation(true);
         navigateTo('dashboard');
     } else {
@@ -49,18 +52,12 @@ function getCookie(name) {
 
 // ユーザープロフィール取得
 async function fetchUserProfile() {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-        console.warn('アクセストークンがありません');
-        return;
-    }
-
-    try {
-        const response = await fetch(apiBase + 'profile/', {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${token}` },
-            credentials: 'include'
-        });
+	try {
+		// Server-authenticated via httpOnly cookie; include credentials so cookie is sent
+		const response = await fetch(apiBase + 'profile/', {
+			method: 'GET',
+			credentials: 'include'
+		});
 
         const data = await response.json();
         if (!response.ok) {
@@ -104,9 +101,8 @@ async function loginWith2FA() {
 
 	const data = await response.json();
 	if (response.ok) {
-		localStorage.setItem('access_token', data.jwt);
+		// Server sets httpOnly cookie for auth; do not store token in JS
 		localStorage.setItem('username', username);
-		document.cookie = `jwt=${data.jwt}; path=/; max-age=86400; SameSite=Lax`;
 		await fetchUserProfile();
 		enableNavigation(true);
 		navigateTo('dashboard');
@@ -167,13 +163,7 @@ if (code) {
 
 		const data = await response.json();  // JSON形式でレスポンスを取得
 
-		// JWTの保存（セキュリティ考慮）
-		if (data.jwt) {
-			localStorage.setItem('access_token', data.jwt);
-			document.cookie = `jwt=${data.jwt}; path=/; max-age=86400; Secure; SameSite=Lax`; // セキュアなクッキーに保存
-		} else {
-			throw new Error('JWT not found in the response');
-		}
+		// Server sets httpOnly cookie for auth; client does not store JWT in JS
 
 		// ユーザープロフィールを取得し、ナビゲーションを有効化
 		await fetchUserProfile();
@@ -254,8 +244,10 @@ async function logout() {
 	} else {
 		alert('ログアウト失敗');
 	}
-    // ローカルストレージ削除
-    localStorage.clear();
+	// 他のユーザー情報はlocalStorageに残っている可能性があるため個別に削除する
+	localStorage.removeItem('username');
+	localStorage.removeItem('email');
+	localStorage.removeItem('opt');
 
     // ナビゲーション無効化
     enableNavigation(false);
@@ -271,19 +263,12 @@ async function logout() {
 }
 
 async function fetchTFAQRCode() {
-	const token = localStorage.getItem('access_token'); // ログイン時に保存したJWTトークン
-
-	if (!token) {
-		alert("ログインが必要です");
-		return;
-	}
-
 	try {
+		// Server-authenticated via httpOnly cookie; include credentials so cookie is sent
 		const response = await fetch(apiBase + 'setup-tfa/', {
 			method: "GET",
 			headers: {
-				"Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
+				"Content-Type": "application/json"
 			},
 			credentials: 'include',
 		});
@@ -302,21 +287,13 @@ async function fetchTFAQRCode() {
 }
 
 async function sendTFAExitRequest() {
-	const token = localStorage.getItem("access_token");
-	if (!token) {
-		console.warn("アクセストークンがありません。");
-		return;
-	}
-
 	try {
-
 		const response = await fetch(apiBase + 'setup-tfa/',  {
 			method: "POST",
 			headers: {
-				"Authorization": `Bearer ${token}`,
 				"Content-Type": "application/json"
 			},
-			credentials: 'include',  // 必要なら追加
+			credentials: 'include',
 			body: JSON.stringify({ action: "exit_2fa" }) 
 		});
 

@@ -5,14 +5,11 @@ function validateInput2(input) {
 }
 
 async function fetchTournaments() {
-	const token = localStorage.getItem('access_token');
-
-	const response = await fetch(TournamentBase + 'tournament/list/', {
-		method: 'GET',
-		headers: { 'Content-Type': 'application/json'
-            ,'Authorization': 'Bearer ' + token },
-        credentials: 'include'  // これでCookieが含まれる
-	});
+ 	const response = await fetch(TournamentBase + 'tournament/list/', {
+ 		method: 'GET',
+ 		headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+ 	});
 
 	const data = await response.json();
 
@@ -35,7 +32,6 @@ async function fetchTournaments() {
 async function createTournament() {
 	const name = document.getElementById('tournament-name').value;
 	const max_participants = 4;
-	const token = localStorage.getItem('access_token');
     if (!validateInput(name)) {
         alert('入力は全て数字かアルファベットでならなければいけない');
         return; // 入力が不正なら処理を中断
@@ -44,9 +40,8 @@ async function createTournament() {
 		method: 'POST',
 		headers: { 
 			'Content-Type': 'application/json',
-			'Authorization': 'Bearer ' + token
-		},
-        credentials: 'include',  // これでCookieが含まれる
+        },
+        credentials: 'include',
 		body: JSON.stringify({name, max_participants})
 
 	});
@@ -64,16 +59,13 @@ async function loadTournamentList() {
     const container = document.getElementById("tournament-list-container");
     container.innerHTML = "<p>読み込み中...</p>";
 
-    const token = localStorage.getItem('access_token'); // ← ここでトークン取得
-
     try {
         const response = await fetch(TournamentBase + 'tournament/list/', {
             method: 'GET',
             headers: {
-                'Authorization': 'Bearer ' + token,
                 'Content-Type': 'application/json'
             },
-            credentials: 'include'  // 必要ならCookieも送る
+            credentials: 'include'
         });
 
         const data = await response.json();

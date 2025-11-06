@@ -28,8 +28,9 @@ let isGameEnded = false; // 試合が終了したかどうか
 
 	$(window).on("popstate", function (event) {
 		stopGameLoop();
-    	const token = localStorage.getItem("access_token");
-        if (token)
+    	// token is no longer available in JS when using httpOnly cookie
+    	const username = localStorage.getItem("username");
+        if (username)
             enableNavigation(true);
 		let page = location.hash.replace('#', '');
 		if (!page || !document.getElementById(page)) {
@@ -138,7 +139,8 @@ let isGameEnded = false; // 試合が終了したかどうか
 	
 		// 初回ロード時にURLの `#` に応じて画面を表示
 		const page = location.hash.replace('#', '') || 'loginSelection';
-		navigateTo(token ? page : 'loginSelection', false);
+		const username2 = localStorage.getItem('username');
+		navigateTo(username2 ? page : 'loginSelection', false);
 	});
 
 	function applyAccessibilitySettings() {
